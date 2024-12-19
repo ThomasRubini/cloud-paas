@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"cloud-paas/internal/entrypoint"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	entrypoint.Entrypoint()
 }

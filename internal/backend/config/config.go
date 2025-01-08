@@ -1,3 +1,4 @@
+// Contains the Config singleton that holds the configuration
 package config
 
 import (
@@ -16,6 +17,7 @@ type Config struct {
 
 var configInst *Config
 
+// get the application configuration
 func Get() Config {
 	if configInst == nil {
 		panic("config not initialized")

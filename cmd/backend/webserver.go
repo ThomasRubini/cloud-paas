@@ -36,7 +36,14 @@ func setupSwag(g *gin.Engine) {
 			c.String(http.StatusNotImplemented, "OpenAPI spec was not enabled/generated")
 		})
 	} else {
-		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		handler := ginSwagger.WrapHandler(swaggerFiles.Handler)
+		g.GET("/swagger/*any", func(ctx *gin.Context) {
+			if ctx.Request.URL.Path == "/swagger/" {
+				ctx.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+			} else {
+				handler(ctx)
+			}
+		})
 	}
 }
 

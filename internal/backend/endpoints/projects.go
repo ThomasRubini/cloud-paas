@@ -1,13 +1,10 @@
 package endpoints
 
-import "github.com/gin-gonic/gin"
+import (
+	"cloud-paas/internal/backend/models"
 
-type Project struct {
-	Name       string
-	Desc       string
-	SourceURL  string
-	AutoDeploy string
-}
+	"github.com/gin-gonic/gin"
+)
 
 func initProjects(g *gin.RouterGroup) {
 	g.GET("/projects", getProjects)
@@ -19,9 +16,9 @@ func initProjects(g *gin.RouterGroup) {
 // @Produce      json
 // @Success      200
 // @Router       /api/v1/projects [get]
-// @Success      200 {array} Project
+// @Success      200 {array} models.DBProject
 func getProjects(c *gin.Context) {
-	projects := []Project{
+	projects := []models.DBProject{
 		{Name: "Project1", Desc: "Description1", SourceURL: "http://source1.com"},
 		{Name: "Project2", Desc: "Description2", SourceURL: "http://source2.com"},
 	}

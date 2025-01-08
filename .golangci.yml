@@ -1,0 +1,11 @@
+# YES this configuration is confusing
+linters:
+  enable:
+    - stylecheck
+
+linters-settings:
+  stylecheck:
+    checks: ["all", "-ST1003"]
+  errcheck:
+    exclude-functions:
+      - (*github.com/gin-gonic/gin.Context).AbortWithError

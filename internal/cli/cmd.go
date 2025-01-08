@@ -50,9 +50,18 @@ var projectCmd = &cli.Command{
 }
 
 var RootCmd = &cli.Command{
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:    "verbose",
+			Usage:   "Enable verbose output",
+			Aliases: []string{"v"},
+		},
+	},
 	Commands: []*cli.Command{
 		registerCmd,
 		loginCmd,
 		projectCmd,
 	},
+
+	Before: rootBefore,
 }

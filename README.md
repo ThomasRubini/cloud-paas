@@ -5,6 +5,6 @@ Test coverage: [![codecov](https://codecov.io/gh/ThomasRubini/cloud-paas/graph/b
 # How to Run
 
 Run backend  
-`go run ./cmd/backend`  
+`./run_backend.sh`  
 Run CLI  
-`go run ./cmd/cli`
+`./run_cli.sh`  

@@ -1,9 +1,8 @@
-.PHONY: backend_docs backend_run
+.PHONY: backend_docs cli backend
 
 backend_docs:
 	(cd internal/backend && swag init)
-backend_run: backend_docs
-	go run ./cmd/backend
-
-cli_run:
-	go run ./cmd/cli
+backend: backend_docs
+	go build -o backend ./cmd/backend
+cli:
+	go build -o cli ./cmd/cli

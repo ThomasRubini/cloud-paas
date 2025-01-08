@@ -1,8 +1,8 @@
-package main
+package backend
 
 import (
-	_ "cloud-paas/cmd/backend/docs"
-	"cloud-paas/cmd/backend/middlewares"
+	_ "cloud-paas/internal/backend/docs"
+	"cloud-paas/internal/backend/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

@@ -1,4 +1,4 @@
-package cli
+package config
 
 import (
 	"os"
@@ -29,7 +29,7 @@ func findConfigFile() *string {
 }
 
 type Config struct {
-	ServerURL string
+	ServerURL string  `yaml:"server_url"`
 }
 
 var configInst *Config

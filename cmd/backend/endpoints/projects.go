@@ -3,9 +3,10 @@ package endpoints
 import "github.com/gin-gonic/gin"
 
 type Project struct {
-	Name      string
-	Desc      string
-	SourceURL string
+	Name       string
+	Desc       string
+	SourceURL  string
+	AutoDeploy string
 }
 
 func initProjects(g *gin.RouterGroup) {

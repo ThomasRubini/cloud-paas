@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
+	g := setupWebServer()
+	launchWebServer(g)
+
 	fmt.Println("Backend main")
 }

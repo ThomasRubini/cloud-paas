@@ -90,7 +90,6 @@ func getUserAndPassword(c *cli.Command) (user string, password string, err error
 }
 
 // Make login request against keycloak
-
 func makeLoginRequest(user, password string) (string, error) {
 	cfg := config.Get()
 

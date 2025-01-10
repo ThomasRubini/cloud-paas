@@ -1,4 +1,4 @@
 .env
 # Binaries
-cli
-backend
+/cli
+/backend

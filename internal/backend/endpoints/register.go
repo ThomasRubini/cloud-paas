@@ -117,7 +117,6 @@ func translateKeycloakError(err string) string {
 // @Produce      json
 // @Success      200
 // @Router       /api/v1/register [post]
-
 func register(c *gin.Context) {
 	var req struct {
 		Username string `json:"username"`

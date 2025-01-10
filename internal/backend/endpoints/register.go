@@ -130,6 +130,9 @@ func register(c *gin.Context) {
 	}
 
 	ret := makeRegisterRequest(req.Username, req.Password)
+	if ret.statusCode == 0 {
+		ret.statusCode = 500
+	}
 	if ret.err != nil {
 		c.JSON(ret.statusCode, gin.H{"error": ret.err.Error()})
 		return

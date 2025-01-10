@@ -1,4 +1,6 @@
 .env
+paas_cli_config.yml
+
 # Binaries
 /cli
 /backend

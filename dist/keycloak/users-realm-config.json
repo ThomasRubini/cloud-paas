@@ -9,7 +9,12 @@
                     "value": "${OIDC_USER_PASSWORD}",
                     "temporary": false
                 }
-            ]
+            ],
+            "clientRoles": {
+                "master-realm": [
+                    "manage-users"
+                ]
+            }
         }
     ]
 }

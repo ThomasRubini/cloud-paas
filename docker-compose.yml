@@ -24,7 +24,7 @@ services:
     ports:
       - 7079:8080
     volumes:
-      - ./dist/keycloak/realm-config.json:/tmp/base-realm-config.json
+      - ./dist/keycloak/base-realm-config.json:/tmp/base-realm-config.json
       - ./dist/keycloak/start.sh:/tmp/start.sh
       - keycloak-data:/opt/keycloak/data
 

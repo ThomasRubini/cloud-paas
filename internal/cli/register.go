@@ -58,7 +58,7 @@ func makeRegisterAccountRequest(user, password string) (string, error) {
 	} else if resp.StatusCode == http.StatusConflict {
 		return "username already exists", nil
 	} else {
-		return "", fmt.Errorf("unexpected status code: %v (%v)", resp.StatusCode, noerror.ReadAll(resp.Body))
+		return "", fmt.Errorf("unexpected status code: %v. Backend response: %v", resp.StatusCode, noerror.ReadAll(resp.Body))
 	}
 }
 

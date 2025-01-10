@@ -96,8 +96,6 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("failed to read user and password: %w", err)
 	}
 
-	fmt.Printf("%v %v\n", user, password)
-
 	validationError, err := makeRegisterAccountRequest(user, password)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)

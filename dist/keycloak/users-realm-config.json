@@ -1,0 +1,15 @@
+{
+    "users": [
+        {
+            "username": "${OIDC_USER_ID}",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "${OIDC_USER_PASSWORD}",
+                    "temporary": false
+                }
+            ]
+        }
+    ]
+}

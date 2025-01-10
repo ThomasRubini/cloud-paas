@@ -20,11 +20,16 @@ services:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - oidc_client_id=${OIDC_CLIENT_ID}
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_USER_ID=${OIDC_USER_ID}
+      - OIDC_USER_PASSWORD=${OIDC_USER_PASSWORD}
+      - JAVA_OPTS_APPEND="-Dkeycloak.migration.replace-placeholders=true" # to replace env vars in realm config
     ports:
       - 7079:8080
     volumes:
       - ./dist/keycloak/base-realm-config.json:/tmp/base-realm-config.json
+      - ./dist/keycloak/users-realm-config.json:/tmp/users-realm-config.json
       - ./dist/keycloak/start.sh:/tmp/start.sh
       - keycloak-data:/opt/keycloak/data
 

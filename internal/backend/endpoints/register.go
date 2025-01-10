@@ -19,7 +19,7 @@ import (
 // TODO maybe use raw Keycloak API rather than gocloak just for that ?
 func getKeycloakAccessToken() (string, error) {
 	cfg := config.Get()
-	client := gocloak.NewClient(cfg.OIDC_URL)
+	client := gocloak.NewClient(cfg.OIDC_BASE_URL)
 
 	token, err := client.Login(
 		context.Background(),
@@ -48,7 +48,7 @@ func makeRegisterRequest(username, password string) registerRequestResult {
 		return registerRequestResult{err: fmt.Errorf("failed to get Keycloak access token: %w", err)}
 	}
 
-	url, err := url.JoinPath(cfg.OIDC_URL, fmt.Sprintf("/admin/realms/%v/users", cfg.OIDC_REALM))
+	url, err := url.JoinPath(cfg.OIDC_BASE_URL, fmt.Sprintf("/admin/realms/%v/users", cfg.OIDC_REALM))
 	if err != nil {
 		return registerRequestResult{err: fmt.Errorf("failed to create Keycloak request URL: %w", err)}
 	}

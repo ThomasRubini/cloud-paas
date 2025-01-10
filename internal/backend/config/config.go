@@ -13,7 +13,7 @@ type Config struct {
 	VERBOSE bool
 
 	DB_URL             string
-	OIDC_URL           string
+	OIDC_BASE_URL      string
 	OIDC_CLIENT_ID     string
 	OIDC_CLIENT_SECRET string
 	OIDC_USER_ID       string
@@ -40,7 +40,7 @@ func Init() {
 	configInst = &Config{
 		VERBOSE:            !slices.Contains([]string{"false", "0", ""}, os.Getenv("VERBOSE")),
 		DB_URL:             os.Getenv("DB_URL"),
-		OIDC_URL:           os.Getenv("OIDC_ISSUER_URL"),
+		OIDC_BASE_URL:      os.Getenv("OIDC_BASE_URL"),
 		OIDC_USER_ID:       os.Getenv("OIDC_USER_ID"),
 		OIDC_USER_PASSWORD: os.Getenv("OIDC_USER_PASSWORD"),
 		OIDC_REALM:         os.Getenv("OIDC_REALM"),

@@ -111,17 +111,18 @@ func translateKeycloakError(err string) string {
 	}
 }
 
+type RegisterInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 // Register godoc
-// @Summary      List projects you have access to
-// @Tags         projects
+// @Summary      Register an account
 // @Produce      json
-// @Success      200
+// @Success      200 {object} RegisterInput
 // @Router       /api/v1/register [post]
 func register(c *gin.Context) {
-	var req struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	var req RegisterInput
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request"})

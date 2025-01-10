@@ -10,7 +10,7 @@ func initProjects(g *gin.RouterGroup) {
 	g.GET("/projects", getProjects)
 }
 
-// PutModel godoc
+// GetProjects godoc
 // @Summary      List projects you have access to
 // @Tags         projects
 // @Produce      json

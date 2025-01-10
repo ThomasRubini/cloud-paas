@@ -4,10 +4,10 @@ package noerror
 
 import "io"
 
-func ReadAll(r io.Reader) []byte {
+func ReadAll(r io.Reader) string {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return string(b)
 }

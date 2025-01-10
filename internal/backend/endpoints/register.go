@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cloud-paas/internal/backend/config"
 	"cloud-paas/internal/noerror"
+	"cloud-paas/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -81,7 +82,7 @@ func makeRegisterRequest(username, password string) registerRequestResult {
 		return registerRequestResult{err: fmt.Errorf("failed to send Keycloak request: %w", err)}
 	}
 
-	if resp.StatusCode == http.StatusOK {
+	if utils.IsStatusCodeOk(resp.StatusCode) {
 		return registerRequestResult{statusCode: resp.StatusCode}
 	} else if resp.StatusCode == http.StatusBadRequest {
 		return registerRequestResult{statusCode: resp.StatusCode, keycloackValidationError: noerror.ReadAll(resp.Body)}
@@ -109,6 +110,13 @@ func translateKeycloakError(err string) string {
 		return "Unknown error"
 	}
 }
+
+// Register godoc
+// @Summary      List projects you have access to
+// @Tags         projects
+// @Produce      json
+// @Success      200
+// @Router       /api/v1/register [post]
 
 func register(c *gin.Context) {
 	var req struct {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cloud-paas/internal/cli/config"
 	"cloud-paas/internal/noerror"
+	"cloud-paas/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -41,7 +42,7 @@ func makeRegisterAccountRequest(user, password string) (string, error) {
 		return "", fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode == http.StatusOK {
+	if utils.IsStatusCodeOk(resp.StatusCode) {
 		// Success
 		return "", nil
 	} else if resp.StatusCode == http.StatusBadRequest {

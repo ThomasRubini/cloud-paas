@@ -1,1 +1,2 @@
-server_url: http://localhost:8080
+backend_url: http://localhost:8080
+oidc_issuer_url: http://localhost:7079

@@ -7,12 +7,9 @@ import (
 )
 
 var loginCmd = &cli.Command{
-	Name:  "login",
-	Usage: "login with your account",
-	Action: func(ctx context.Context, c *cli.Command) error {
-		println("login called")
-		return nil
-	},
+	Name:   "login",
+	Usage:  "login with your account",
+	Action: LoginAction,
 }
 
 var registerCmd = &cli.Command{

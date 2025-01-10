@@ -29,7 +29,9 @@ func findConfigFile() *string {
 }
 
 type Config struct {
-	ServerURL string  `yaml:"server_url"`
+	BackendURL    string `yaml:"backend_url"`
+	OIDCIssuerURL string `yaml:"oidc_issuer_url"`
+	AuthToken     string `yaml:"auth_token"`
 }
 
 var configInst *Config

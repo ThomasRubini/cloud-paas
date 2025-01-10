@@ -23,7 +23,7 @@ func setupLogging(c *cli.Command) {
 func rootBefore(ctx context.Context, c *cli.Command) (context.Context, error) {
 	setupLogging(c)
 
-	logrus.Debugf("Server URL: %v", config.Get().ServerURL)
+	logrus.Debugf("Server URL: %v", config.Get().BackendURL)
 
 	return ctx, nil
 }

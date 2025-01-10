@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -31,7 +32,7 @@ func findConfigFile() *string {
 type Config struct {
 	BACKEND_URL    string `yaml:"backend_url"`
 	OIDC_REALM_URL string `yaml:"oidc_realm_url"`
-	AUTH_TOKEN     string `yaml:"auth_token"`
+	REFRESH_TOKEN  string `yaml:"refresh_token"`
 }
 
 var configInst *Config
@@ -42,6 +43,27 @@ func Get() Config {
 	} else {
 		return *configInst
 	}
+}
+
+func Save(cfg Config) error {
+
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config into yaml: %w", err)
+	}
+
+	configFile := findConfigFile()
+	if configFile == nil {
+		return fmt.Errorf("config file not found")
+	}
+
+	err = os.WriteFile(*configFile, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	configInst = &cfg
+	return nil
 }
 
 func Init() {

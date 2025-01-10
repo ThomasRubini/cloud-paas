@@ -114,22 +114,21 @@ func makeLoginRequest(user, password string) (string, error) {
 		return "", fmt.Errorf("unexpected status code: %d (%v)", resp.StatusCode, string(body))
 	}
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	type response struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	var r response
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	token, ok := result["access_token"].(string)
-	if !ok {
-		return "", fmt.Errorf("access token not found in response")
-	}
-
-	return token, nil
+	return r.RefreshToken, nil
 }
 
 func RegisterAction(ctx context.Context, c *cli.Command) error {
 	conf := config.Get()
-	if conf.AUTH_TOKEN != "" {
+	if conf.REFRESH_TOKEN != "" {
 		return fmt.Errorf("already logged in")
 	}
 
@@ -152,7 +151,13 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("registration succeeded, but login to get token failed: %w", err)
 	}
 
-	fmt.Printf("Access token: %v\n", token)
+	cfg := config.Get()
+	cfg.REFRESH_TOKEN = token
+	err = config.Save(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to save config: %w", err)
+	}
 
-	panic("TODO: save config")
+	fmt.Println("Registration successful")
+	return nil
 }

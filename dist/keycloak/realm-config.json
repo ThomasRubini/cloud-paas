@@ -1,0 +1,23 @@
+{
+    "realm": "master",
+    "displayName": "Cloud PaaS",
+    "enabled": true,
+    "clients": [
+        {
+            "clientId": "cli",
+            "publicClient": true,
+            "directAccessGrantsEnabled": true
+        }
+    ],
+    "requiredActions": [
+        {
+            "alias": "UPDATE_PROFILE",
+            "name": "Update Profile",
+            "providerId": "UPDATE_PROFILE",
+            "enabled": false,
+            "defaultAction": false,
+            "priority": 40,
+            "config": {}
+        }
+    ]
+}

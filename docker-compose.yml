@@ -12,17 +12,23 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0.0
+    image: mykeycloak
+    build:
+      context: ./dist/keycloak/
+      dockerfile: Dockerfile
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KEYCLOAK_IMPORT=/opt/keycloak/data/import/realm-config.json
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
     ports:
       - 7079:8080
     volumes:
-      - ./dist/keycloak/realm-config.json:/opt/keycloak/data/import/realm-config.json
+      - ./dist/keycloak/realm-config.json:/tmp/base-realm-config.json
+      - ./dist/keycloak/start.sh:/tmp/start.sh
       - keycloak-data:/opt/keycloak/data
 
+    entrypoint: ["/tmp/start.sh"]
     command: ["start-dev", "--import-realm"]
     restart: unless-stopped
 

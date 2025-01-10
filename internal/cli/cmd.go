@@ -13,12 +13,9 @@ var loginCmd = &cli.Command{
 }
 
 var registerCmd = &cli.Command{
-	Name:  "register",
-	Usage: "Register an account against the PaaS",
-	Action: func(ctx context.Context, c *cli.Command) error {
-		println("add called")
-		return nil
-	},
+	Name:   "register",
+	Usage:  "Register an account against the PaaS",
+	Action: RegisterAction,
 }
 
 var projectRegisterCmd = &cli.Command{

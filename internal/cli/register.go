@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"cloud-paas/internal/cli/config"
 	"context"
 	"encoding/json"
@@ -14,22 +15,26 @@ import (
 	"golang.org/x/term"
 )
 
-func makeDirectGrantRequest(issuer_url, user, password string) (*string, error) {
-	res, err := url.JoinPath(issuer_url, "/protocol/openid-connect/token")
+func registerAccountRequest(user, password string) (*string, error) {
+	url, err := url.JoinPath(config.Get().BackendURL, "/api/v1/register")
 	if err != nil {
 		return nil, fmt.Errorf("failed to join url: %w", err)
 	}
 
-	resp, err := http.PostForm(res, url.Values{
-		"grant_type": {"password"},
-		"client_id":  {"cli"},
-		"username":   {user},
-		"password":   {password},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+	data := map[string]any{
+		"username": user,
+		"password": password,
 	}
-	defer resp.Body.Close()
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse into json: %w", err)
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -88,7 +93,7 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 
 	fmt.Printf("%v %v\n", user, password)
 
-	token, err := makeDirectGrantRequest(conf.OIDCIssuerURL, user, password)
+	token, err := registerAccountRequest(user, password)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}

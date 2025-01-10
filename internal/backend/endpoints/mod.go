@@ -7,4 +7,5 @@ import (
 
 func Init(g *gin.RouterGroup) {
 	initProjects(g)
+	initRegister(g)
 }

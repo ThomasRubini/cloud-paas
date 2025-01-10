@@ -3,10 +3,10 @@ package endpoints
 import (
 	"bytes"
 	"cloud-paas/internal/backend/config"
+	"cloud-paas/internal/noerror"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 
@@ -34,6 +34,7 @@ func getKeycloakAccessToken() (string, error) {
 }
 
 type registerRequestResult struct {
+	statusCode               int
 	err                      error
 	keycloackValidationError string
 }
@@ -81,13 +82,11 @@ func makeRegisterRequest(username, password string) registerRequestResult {
 	}
 
 	if resp.StatusCode == http.StatusOK {
-		return registerRequestResult{}
+		return registerRequestResult{statusCode: resp.StatusCode}
 	} else if resp.StatusCode == http.StatusBadRequest {
-		b, _ := io.ReadAll(resp.Body)
-		return registerRequestResult{keycloackValidationError: string(b)}
+		return registerRequestResult{statusCode: resp.StatusCode, keycloackValidationError: noerror.ReadAll(resp.Body)}
 	} else {
-		b, _ := io.ReadAll(resp.Body)
-		return registerRequestResult{err: fmt.Errorf("unexpected status code: %d (%v)", resp.StatusCode, string(b))}
+		return registerRequestResult{statusCode: resp.StatusCode, err: fmt.Errorf("got error response. Body: %v", noerror.ReadAll(resp.Body))}
 	}
 }
 
@@ -124,10 +123,10 @@ func register(c *gin.Context) {
 
 	ret := makeRegisterRequest(req.Username, req.Password)
 	if ret.err != nil {
-		c.JSON(500, gin.H{"error": ret.err.Error()})
+		c.JSON(ret.statusCode, gin.H{"error": ret.err.Error()})
 		return
 	} else if ret.keycloackValidationError != "" {
-		c.JSON(400, gin.H{"status": translateKeycloakError(ret.keycloackValidationError)})
+		c.JSON(ret.statusCode, gin.H{"status": translateKeycloakError(ret.keycloackValidationError)})
 	} else {
 		c.JSON(200, gin.H{"status": "user registered successfully"})
 	}

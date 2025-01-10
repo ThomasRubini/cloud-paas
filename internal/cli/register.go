@@ -55,6 +55,8 @@ func makeRegisterAccountRequest(user, password string) (string, error) {
 			return "", fmt.Errorf("failed to decode validation error response: %w", err)
 		}
 		return vErr.Status, nil
+	} else if resp.StatusCode == http.StatusConflict {
+		return "username already exists", nil
 	} else {
 		return "", fmt.Errorf("unexpected status code: %v (%v)", resp.StatusCode, noerror.ReadAll(resp.Body))
 	}

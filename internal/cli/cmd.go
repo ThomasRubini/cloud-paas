@@ -13,8 +13,20 @@ var loginCmd = &cli.Command{
 }
 
 var registerCmd = &cli.Command{
-	Name:   "register",
-	Usage:  "Register an account against the PaaS",
+	Name:  "register",
+	Usage: "Register an account against the PaaS",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "user",
+			Usage:   "Username for the account",
+			Aliases: []string{"u", "username"},
+		},
+		&cli.StringFlag{
+			Name:    "password",
+			Usage:   "Password for the account",
+			Aliases: []string{"p"},
+		},
+	},
 	Action: RegisterAction,
 }
 

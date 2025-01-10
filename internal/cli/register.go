@@ -50,21 +50,27 @@ func makeDirectGrantRequest(issuer_url, user, password string) (*string, error) 
 	return &token, nil
 }
 
-func readUserAndPassword() (string, string, error) {
-	var user, password string
-	fmt.Print("Enter username: ")
-	_, err := fmt.Scanln(&user)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read username: %w", err)
+func getUserAndPassword(c *cli.Command) (user string, password string, err error) {
+	user = c.String("user")
+	if user == "" {
+		fmt.Print("Enter username: ")
+		_, err = fmt.Scanln(&user)
+		if err != nil {
+			err = fmt.Errorf("failed to read username: %w", err)
+			return
+		}
 	}
 
-	fmt.Print("Enter password: ")
-	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read password: %w", err)
+	password = c.String("password")
+	if password == "" {
+		fmt.Print("Enter password: ")
+		bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return "", "", fmt.Errorf("failed to read password: %w", err)
+		}
+		password = string(bytePassword)
+		fmt.Println()
 	}
-	password = string(bytePassword)
-	fmt.Println()
 
 	return user, password, nil
 }
@@ -75,7 +81,7 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("already logged in")
 	}
 
-	user, password, err := readUserAndPassword()
+	user, password, err := getUserAndPassword(c)
 	if err != nil {
 		return fmt.Errorf("failed to read user and password: %w", err)
 	}

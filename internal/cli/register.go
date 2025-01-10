@@ -100,7 +100,7 @@ func makeLoginRequest(user, password string) (string, error) {
 
 	resp, err := http.PostForm(res, url.Values{
 		"grant_type": {"password"},
-		"client_id":  {"cli"},
+		"client_id":  {"paas-cli"},
 		"username":   {user},
 		"password":   {password},
 	})

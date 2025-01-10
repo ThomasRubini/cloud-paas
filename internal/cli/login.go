@@ -10,7 +10,7 @@ import (
 
 func LoginAction(ctx context.Context, c *cli.Command) error {
 	conf := config.Get()
-	if conf.AuthToken != "" {
+	if conf.AUTH_TOKEN != "" {
 		return fmt.Errorf("already logged in")
 	}
 

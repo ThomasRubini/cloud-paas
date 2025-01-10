@@ -22,7 +22,7 @@ import (
 // - Validation failure in backend (returns "validation error", nil)
 // - Success (returns "", nil)
 func makeRegisterAccountRequest(user, password string) (string, error) {
-	url, err := url.JoinPath(config.Get().BackendURL, "/api/v1/register")
+	url, err := url.JoinPath(config.Get().BACKEND_URL, "/api/v1/register")
 	if err != nil {
 		return "", fmt.Errorf("failed to join url: %w", err)
 	}
@@ -90,7 +90,7 @@ func getUserAndPassword(c *cli.Command) (user string, password string, err error
 
 func RegisterAction(ctx context.Context, c *cli.Command) error {
 	conf := config.Get()
-	if conf.AuthToken != "" {
+	if conf.AUTH_TOKEN != "" {
 		return fmt.Errorf("already logged in")
 	}
 

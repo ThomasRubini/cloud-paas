@@ -3,10 +3,10 @@ package cli
 import (
 	"bytes"
 	"cloud-paas/internal/cli/config"
+	"cloud-paas/internal/noerror"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"syscall"
@@ -15,10 +15,15 @@ import (
 	"golang.org/x/term"
 )
 
-func registerAccountRequest(user, password string) (*string, error) {
+// Does not parse response
+// Has 3 return possibilities:
+// - Technical error (returns "", err)
+// - Validation failure in backend (returns "validation error", nil)
+// - Success (returns "", nil)
+func makeRegisterAccountRequest(user, password string) (string, error) {
 	url, err := url.JoinPath(config.Get().BackendURL, "/api/v1/register")
 	if err != nil {
-		return nil, fmt.Errorf("failed to join url: %w", err)
+		return "", fmt.Errorf("failed to join url: %w", err)
 	}
 
 	data := map[string]any{
@@ -28,31 +33,31 @@ func registerAccountRequest(user, password string) (*string, error) {
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse into json: %w", err)
+		return "", fmt.Errorf("failed to parse into json: %w", err)
 	}
 
 	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
 	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
+		return "", fmt.Errorf("failed to send request: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d (%v)", resp.StatusCode, string(body))
-	}
+	if resp.StatusCode == http.StatusOK {
+		// Success
+		return "", nil
+	} else if resp.StatusCode == http.StatusBadRequest {
+		// Parse validation error msg
+		type validationError struct {
+			Status string `json:"status"`
+		}
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		var vErr validationError
+		if err := json.NewDecoder(resp.Body).Decode(&vErr); err != nil {
+			return "", fmt.Errorf("failed to decode validation error response: %w", err)
+		}
+		return vErr.Status, nil
+	} else {
+		return "", fmt.Errorf("unexpected status code: %v (%v)", resp.StatusCode, noerror.ReadAll(resp.Body))
 	}
-
-	token, ok := result["access_token"].(string)
-	if !ok {
-		return nil, fmt.Errorf("access token not found in response")
-	}
-
-	fmt.Println("Access Token:", token)
-	return &token, nil
 }
 
 func getUserAndPassword(c *cli.Command) (user string, password string, err error) {
@@ -93,11 +98,14 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 
 	fmt.Printf("%v %v\n", user, password)
 
-	token, err := registerAccountRequest(user, password)
+	validationError, err := makeRegisterAccountRequest(user, password)
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}
+	if validationError != "" {
+		fmt.Printf("Validation error: %v\n", validationError)
+		return nil
+	}
 
-	conf.AuthToken = *token
 	panic("TODO: save config")
 }

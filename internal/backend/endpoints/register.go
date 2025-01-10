@@ -12,6 +12,7 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // TODO maybe use raw Keycloak API rather than gocloak just for that ?
@@ -90,6 +91,26 @@ func makeRegisterRequest(username, password string) registerRequestResult {
 	}
 }
 
+func translateKeycloakError(err string) string {
+	var keycloakError struct {
+		ErrorMessage string        `json:"errorMessage"`
+		Field        string        `json:"field"`
+		Params       []interface{} `json:"params"`
+	}
+
+	if err := json.Unmarshal([]byte(err), &keycloakError); err != nil {
+		return "Unknown error"
+	}
+
+	switch keycloakError.ErrorMessage {
+	case "error-invalid-length":
+		return fmt.Sprintf("Attribute %v must be between %v and %v characters long", keycloakError.Field, keycloakError.Params[1], keycloakError.Params[2])
+	default:
+		logrus.Error("Register failed because of unknown Keycloak error: ", keycloakError)
+		return "Unknown error"
+	}
+}
+
 func register(c *gin.Context) {
 	var req struct {
 		Username string `json:"username"`
@@ -106,7 +127,7 @@ func register(c *gin.Context) {
 		c.JSON(500, gin.H{"error": ret.err.Error()})
 		return
 	} else if ret.keycloackValidationError != "" {
-		c.Data(400, "application/json", []byte(ret.keycloackValidationError))
+		c.JSON(400, gin.H{"status": translateKeycloakError(ret.keycloackValidationError)})
 	} else {
 		c.JSON(200, gin.H{"status": "user registered successfully"})
 	}

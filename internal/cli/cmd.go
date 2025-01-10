@@ -24,7 +24,7 @@ var registerCmd = &cli.Command{
 		&cli.StringFlag{
 			Name:    "password",
 			Usage:   "Password for the account. Warning: this option and will log the password to your shell history. Prefer using stdin to input the password",
-			Aliases: []string{"p"},
+			Aliases: []string{"p", "pass"},
 		},
 	},
 	Action: RegisterAction,

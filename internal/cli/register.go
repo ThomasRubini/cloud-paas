@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"syscall"
@@ -88,6 +89,45 @@ func getUserAndPassword(c *cli.Command) (user string, password string, err error
 	return user, password, nil
 }
 
+// Make login request against keycloak
+
+func makeLoginRequest(user, password string) (string, error) {
+	cfg := config.Get()
+
+	res, err := url.JoinPath(cfg.OIDC_REALM_URL, "/protocol/openid-connect/token")
+	if err != nil {
+		return "", fmt.Errorf("failed to join url: %w", err)
+	}
+
+	resp, err := http.PostForm(res, url.Values{
+		"grant_type": {"password"},
+		"client_id":  {"cli"},
+		"username":   {user},
+		"password":   {password},
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("unexpected status code: %d (%v)", resp.StatusCode, string(body))
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	token, ok := result["access_token"].(string)
+	if !ok {
+		return "", fmt.Errorf("access token not found in response")
+	}
+
+	return token, nil
+}
+
 func RegisterAction(ctx context.Context, c *cli.Command) error {
 	conf := config.Get()
 	if conf.AUTH_TOKEN != "" {
@@ -107,6 +147,13 @@ func RegisterAction(ctx context.Context, c *cli.Command) error {
 		fmt.Printf("Validation error: %v\n", validationError)
 		return nil
 	}
+
+	token, err := makeLoginRequest(user, password)
+	if err != nil {
+		return fmt.Errorf("registration succeeded, but login to get token failed: %w", err)
+	}
+
+	fmt.Printf("Access token: %v\n", token)
 
 	panic("TODO: save config")
 }

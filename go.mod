@@ -55,6 +55,7 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	google.golang.org/protobuf v1.36.2 // indirect
+	gopkg.in/resty.v1 v1.12.0
 )
 
 require (

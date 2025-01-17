@@ -1,10 +1,8 @@
 package cli
 
 import (
-	"bytes"
 	"cloud-paas/internal/cli/config"
 	"cloud-paas/internal/noerror"
-	"cloud-paas/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -23,44 +21,37 @@ import (
 // - Validation failure in backend (returns "validation error", nil)
 // - Success (returns "", nil)
 func makeRegisterAccountRequest(user, password string) (string, error) {
-	url, err := url.JoinPath(config.Get().BACKEND_URL, "/api/v1/register")
-	if err != nil {
-		return "", fmt.Errorf("failed to join url: %w", err)
-	}
 
-	data := map[string]any{
+	body := map[string]any{
 		"username": user,
 		"password": password,
 	}
 
-	jsonData, err := json.Marshal(data)
+	api := getAPIClient()
+	resp, err := api.R().SetBody(body).Post("/api/v1/register")
 	if err != nil {
-		return "", fmt.Errorf("failed to parse into json: %w", err)
+		return "", fmt.Errorf("failed to make request: %w", err)
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewReader(jsonData))
-	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
-	}
-
-	if utils.IsStatusCodeOk(resp.StatusCode) {
+	statusCode := resp.StatusCode()
+	if resp.IsSuccess() {
 		// Success
 		return "", nil
-	} else if resp.StatusCode == http.StatusBadRequest {
+	} else if statusCode == http.StatusBadRequest {
 		// Parse validation error msg
 		type validationError struct {
 			Status string `json:"status"`
 		}
 
 		var vErr validationError
-		if err := json.NewDecoder(resp.Body).Decode(&vErr); err != nil {
+		if err := json.NewDecoder(resp.RawBody()).Decode(&vErr); err != nil {
 			return "", fmt.Errorf("failed to decode validation error response: %w", err)
 		}
 		return vErr.Status, nil
-	} else if resp.StatusCode == http.StatusConflict {
+	} else if statusCode == http.StatusConflict {
 		return "username already exists", nil
 	} else {
-		return "", fmt.Errorf("unexpected status code: %v. Backend response: %v", resp.StatusCode, noerror.ReadAll(resp.Body))
+		return "", fmt.Errorf("unexpected status code: %v. Backend response: %v", statusCode, noerror.ReadAll(resp.RawBody()))
 	}
 }
 

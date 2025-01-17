@@ -1,7 +1,7 @@
 package main
 
-import "cloud-paas/internal/cli"
+import "cloud-paas/internal/paas_cli"
 
 func main() {
-	cli.Entrypoint()
+	paas_cli.Entrypoint()
 }

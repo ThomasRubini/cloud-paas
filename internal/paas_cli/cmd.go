@@ -1,4 +1,4 @@
-package cli
+package paas_cli
 
 import (
 	"context"

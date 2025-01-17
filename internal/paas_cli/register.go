@@ -1,8 +1,8 @@
-package cli
+package paas_cli
 
 import (
-	"cloud-paas/internal/cli/config"
 	"cloud-paas/internal/noerror"
+	"cloud-paas/internal/paas_cli/config"
 	"context"
 	"encoding/json"
 	"fmt"

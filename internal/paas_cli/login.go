@@ -1,9 +1,10 @@
 package paas_cli
 
 import (
-	"cloud-paas/internal/paas_cli/config"
 	"context"
 	"fmt"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
 
 	"github.com/urfave/cli/v3"
 )

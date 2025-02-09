@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cloud-paas/internal/paas_backend"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
 )
 
 func main() {

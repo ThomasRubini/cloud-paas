@@ -1,8 +1,6 @@
 package paas_cli
 
 import (
-	"cloud-paas/internal/noerror"
-	"cloud-paas/internal/paas_cli/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,6 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"syscall"
+
+	"github.com/ThomasRubini/cloud-paas/internal/noerror"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
 
 	"github.com/urfave/cli/v3"
 	"golang.org/x/term"

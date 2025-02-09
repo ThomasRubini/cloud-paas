@@ -2,14 +2,15 @@ package endpoints
 
 import (
 	"bytes"
-	"cloud-paas/internal/noerror"
-	"cloud-paas/internal/paas_backend/config"
-	"cloud-paas/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/ThomasRubini/cloud-paas/internal/noerror"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"

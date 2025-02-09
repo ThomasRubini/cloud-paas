@@ -1,14 +1,15 @@
 package repofetch
 
 import (
-	"cloud-paas/internal/paas_backend/config"
-	"cloud-paas/internal/paas_backend/models"
-	"cloud-paas/internal/paas_backend/state"
 	"errors"
 	"fmt"
 	"os"
 	"path"
 	"time"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 
 	"github.com/go-git/go-git/v5"
 	gitconfig "github.com/go-git/go-git/v5/config"

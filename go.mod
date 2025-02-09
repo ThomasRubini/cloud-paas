@@ -1,4 +1,4 @@
-module cloud-paas
+module github.com/ThomasRubini/cloud-paas
 
 go 1.23.3
 

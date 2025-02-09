@@ -1,7 +1,7 @@
 package paas_cli
 
 import (
-	"cloud-paas/internal/paas_cli/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
 
 	"gopkg.in/resty.v1"
 )

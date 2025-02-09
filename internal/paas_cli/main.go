@@ -1,10 +1,11 @@
 package paas_cli
 
 import (
-	"cloud-paas/internal/paas_cli/config"
 	"context"
 	"log"
 	"os"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v3"

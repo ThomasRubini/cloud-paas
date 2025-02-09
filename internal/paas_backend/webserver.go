@@ -1,9 +1,10 @@
 package paas_backend
 
 import (
-	_ "cloud-paas/internal/paas_backend/docs"
-	"cloud-paas/internal/paas_backend/middlewares"
 	"net/http"
+
+	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/middlewares"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files

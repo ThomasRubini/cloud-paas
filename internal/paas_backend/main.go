@@ -2,13 +2,14 @@
 package paas_backend
 
 import (
-	"cloud-paas/internal/paas_backend/config"
-	"cloud-paas/internal/paas_backend/endpoints"
-	"cloud-paas/internal/paas_backend/models"
-	"cloud-paas/internal/paas_backend/repofetch"
-	"cloud-paas/internal/paas_backend/state"
 	"flag"
 	"fmt"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/endpoints"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"

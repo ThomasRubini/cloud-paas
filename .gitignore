@@ -4,3 +4,4 @@ paas_cli_config.yml
 # Binaries
 /cli
 /backend
+/paas-data

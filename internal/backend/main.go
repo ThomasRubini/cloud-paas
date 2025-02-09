@@ -1,8 +1,12 @@
+// Main backend logic
 package backend
 
 import (
 	"cloud-paas/internal/backend/config"
 	"cloud-paas/internal/backend/endpoints"
+	"cloud-paas/internal/backend/models"
+	"cloud-paas/internal/backend/repofetch"
+	"cloud-paas/internal/backend/state"
 	"flag"
 	"fmt"
 
@@ -11,16 +15,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func connectToDB() *gorm.DB {
+func connectToDB() (*gorm.DB, error) {
 	c := config.Get()
 	logrus.Debug("Connecting to database..")
 	db, err := gorm.Open(postgres.Open(c.DB_URL), &gorm.Config{TranslateError: true})
 	if err != nil {
-		panic(fmt.Sprintf("failed to connect to db: %v", err))
+		return nil, fmt.Errorf("failed to connect to db: %v", err)
 	}
 	logrus.Debug("Connected to database !")
 
-	return db
+	models := []interface{}{models.DBProject{}}
+
+	logrus.Debug("Running database migrations..")
+	for _, model := range models {
+		if db.AutoMigrate(model) != nil {
+			return nil, fmt.Errorf("failed to run database migrations for model %v", model)
+		}
+	}
+
+	return db, nil
 }
 
 func setupLogging() {
@@ -41,13 +54,24 @@ func Entrypoint() {
 	config.Init()
 	setupLogging()
 
-	SetState(BackendState{
-		db: connectToDB(),
+	// Connect to DB
+	db, err := connectToDB()
+	if err != nil {
+		logrus.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Setup state
+	state.Set(state.T{
+		Db: db,
 	})
 
+	// Setup web server
 	g := setupWebServer()
 	endpoints.Init(g.Group("/api/v1"))
-	launchWebServer(g)
 
-	fmt.Println("Backend main")
+	// init crontab for fetching repos
+	repofetch.Init(config.Get().REPO_FETCH_PERIOD_SECS)
+
+	// Launch web server. Function will never return
+	launchWebServer(g)
 }

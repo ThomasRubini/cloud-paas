@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:latest
-    container_name: postgres_db
     environment:
       POSTGRES_USER: paas
       POSTGRES_PASSWORD: paas

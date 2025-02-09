@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"cloud-paas/internal/backend/models"
+	"cloud-paas/internal/paas_backend/models"
 
 	"github.com/gin-gonic/gin"
 )

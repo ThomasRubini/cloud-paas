@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cloud-paas/internal/backend"
+	"cloud-paas/internal/paas_backend"
 )
 
 func main() {
-	backend.Entrypoint()
+	paas_backend.Entrypoint()
 }

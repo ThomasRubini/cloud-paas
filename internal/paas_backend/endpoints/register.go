@@ -2,8 +2,8 @@ package endpoints
 
 import (
 	"bytes"
-	"cloud-paas/internal/backend/config"
 	"cloud-paas/internal/noerror"
+	"cloud-paas/internal/paas_backend/config"
 	"cloud-paas/internal/utils"
 	"context"
 	"encoding/json"

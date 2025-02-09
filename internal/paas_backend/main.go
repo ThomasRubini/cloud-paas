@@ -1,12 +1,12 @@
 // Main backend logic
-package backend
+package paas_backend
 
 import (
-	"cloud-paas/internal/backend/config"
-	"cloud-paas/internal/backend/endpoints"
-	"cloud-paas/internal/backend/models"
-	"cloud-paas/internal/backend/repofetch"
-	"cloud-paas/internal/backend/state"
+	"cloud-paas/internal/paas_backend/config"
+	"cloud-paas/internal/paas_backend/endpoints"
+	"cloud-paas/internal/paas_backend/models"
+	"cloud-paas/internal/paas_backend/repofetch"
+	"cloud-paas/internal/paas_backend/state"
 	"flag"
 	"fmt"
 

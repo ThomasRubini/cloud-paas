@@ -1,9 +1,9 @@
 package repofetch
 
 import (
-	"cloud-paas/internal/backend/config"
-	"cloud-paas/internal/backend/models"
-	"cloud-paas/internal/backend/state"
+	"cloud-paas/internal/paas_backend/config"
+	"cloud-paas/internal/paas_backend/models"
+	"cloud-paas/internal/paas_backend/state"
 	"errors"
 	"fmt"
 	"os"

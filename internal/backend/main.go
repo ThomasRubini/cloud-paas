@@ -38,16 +38,21 @@ func connectToDB() (*gorm.DB, error) {
 
 func setupLogging() {
 	var cliVerbose bool
+	var cliTrace bool
 	flag.BoolVar(&cliVerbose, "v", false, "enable verbose logging")
+	flag.BoolVar(&cliTrace, "vv", false, "enable trace logging")
 	flag.Parse()
 
-	if cliVerbose || config.Get().VERBOSE {
+	if cliTrace {
+		logrus.SetLevel(logrus.TraceLevel)
+	} else if cliVerbose || config.Get().VERBOSE {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
 
 	logrus.Debug("Verbose logging enabled")
+	logrus.Trace("Trace logging enabled")
 }
 
 func Entrypoint() {

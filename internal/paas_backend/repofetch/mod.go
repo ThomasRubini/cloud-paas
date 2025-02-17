@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,10 +19,16 @@ func isDir(path string) bool {
 	return stat.IsDir()
 }
 
+// called on every repository on a schedule to pull them and update them
 func handleRepository(project models.DBProject) error {
 	err := pullRepository(project)
 	if err != nil {
 		return fmt.Errorf("error pulling repository: %v", err)
+	}
+
+	err = logic.HandleRepositoryUpdate(project)
+	if err != nil {
+		return fmt.Errorf("error handling repository update: %v", err)
 	}
 
 	return nil

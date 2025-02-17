@@ -1,9 +1,17 @@
 package main
 
 import (
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
+	"fmt"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/imgbuild"
 )
 
 func main() {
-	paas_backend.Entrypoint()
+	err := imgbuild.Build("/home/itrooz/tmp2", []string{"test"})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("Hey")
+	// paas_backend.Entrypoint()
 }

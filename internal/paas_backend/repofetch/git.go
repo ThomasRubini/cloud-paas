@@ -3,9 +3,7 @@ package repofetch
 import (
 	"errors"
 	"fmt"
-	"path"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/go-git/go-git/v5"
 	gitconfig "github.com/go-git/go-git/v5/config"
@@ -57,11 +55,9 @@ func fetchRepoChanges(project models.DBProject, dir string) error {
 }
 
 func pullRepository(project models.DBProject) error {
-	p := config.Get().REPO_DIR
-	// TODO use project ID for folder
-	dir := path.Join(p, project.Name)
+	dir := project.GetPath()
 
-	logrus.Debugf("Pulling repository %v at %v", project.Name, p)
+	logrus.Debugf("Pulling repository %v at %v", project.Name, dir)
 
 	if !isDir(dir) {
 		err := initRepoIfNotExists(project, dir)

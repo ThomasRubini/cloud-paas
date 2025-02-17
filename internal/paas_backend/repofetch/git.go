@@ -9,8 +9,20 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/go-git/go-git/v5"
 	gitconfig "github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/sirupsen/logrus"
 )
+
+func getAuth(project models.DBProject) transport.AuthMethod {
+	if project.SourcePassword != "" {
+		return &http.BasicAuth{
+			Username: project.SourceUsername,
+			Password: project.SourcePassword,
+		}
+	}
+	return nil
+}
 
 func initRepoIfNotExists(project models.DBProject, dir string) error {
 	repo, err := git.PlainInit(dir, true)
@@ -28,7 +40,7 @@ func initRepoIfNotExists(project models.DBProject, dir string) error {
 	return nil
 }
 
-func fetchRepoChanges(dir string) error {
+func fetchRepoChanges(project models.DBProject, dir string) error {
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
@@ -36,6 +48,7 @@ func fetchRepoChanges(dir string) error {
 
 	err = repo.Fetch(&git.FetchOptions{
 		RemoteName: "origin",
+		Auth:       getAuth(project),
 	})
 	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return fmt.Errorf("error fetching repository: %v", err)
@@ -57,7 +70,7 @@ func pullRepository(project models.DBProject) error {
 		}
 	}
 
-	err := fetchRepoChanges(dir)
+	err := fetchRepoChanges(project, dir)
 	if err != nil {
 		return err
 	}

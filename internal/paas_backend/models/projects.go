@@ -1,8 +1,10 @@
 package models
 
 type DBProject struct {
-	Name       string
-	Desc       string
-	SourceURL  string
-	AutoDeploy bool
+	Name           string
+	Desc           string
+	SourceURL      string
+	SourceUsername string
+	SourcePassword string
+	AutoDeploy     bool
 }

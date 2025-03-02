@@ -23,6 +23,11 @@ jobs:
 
     - name: Build documentation
       run: make backend_docs
+    
+    - name: Run pre-commit
+      run: |
+        pipx install pre-commit
+        pre-commit run --all-files
 
     - name: Build
       run: go build -v ./...

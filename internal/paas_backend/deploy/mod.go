@@ -20,7 +20,7 @@ Inputs:
   - Image
   - TCP Port exposed inside the image
 */
-func DeployApp(deployment models.DBDeployment, image string, namespace string, hostHeader string, exposedPort int) error {
+func DeployApp(deployment models.DBDeployment, imageTag string, namespace string, hostHeader string, exposedPort int) error {
 	/* TL;DR
 	I. Build Deployement
 		1. Get image
@@ -70,7 +70,7 @@ func DeployApp(deployment models.DBDeployment, image string, namespace string, h
 					Containers: []apiv1.Container{
 						{
 							Name:  appName,
-							Image: image,
+							Image: imageTag,
 							Ports: []apiv1.ContainerPort{
 								{
 									Name:          "http",

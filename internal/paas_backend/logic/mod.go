@@ -14,7 +14,7 @@ func HandleRepositoryUpdate(project models.DBProject) error {
 
 	// Rebuild the image using the updated repository
 	// TODO what to name the tags ?
-	err := imgbuild.Build(project.GetPath(), []string{project.Name})
+	err := imgbuild.Build(project.GetPath(), project.Name)
 	if err != nil {
 		return fmt.Errorf("error building image: %v", err)
 	}

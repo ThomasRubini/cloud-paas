@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := imgbuild.Build("/home/itrooz/tmp2", []string{"test"})
+	err := imgbuild.Build("/home/itrooz/tmp2", "test")
 	if err != nil {
 		fmt.Println(err)
 	}

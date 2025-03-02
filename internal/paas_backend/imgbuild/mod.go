@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
 )
 
@@ -59,4 +60,28 @@ func Build(buildContextPath string, tag string) error {
 	}
 
 	return nil
+}
+
+func GetExposedPort(tag string) *int {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		log.Fatalf("cli error - %s", err)
+		return nil
+	}
+	imageInspect, _, err := cli.ImageInspectWithRaw(ctx, tag)
+	if err != nil {
+		log.Fatalf("inspect error - %s", err)
+		return nil
+	}
+
+	var port int
+	if len(imageInspect.Config.ExposedPorts) > 0 {
+		keys := make([]nat.Port, 0, len(imageInspect.Config.ExposedPorts))
+		for p := range imageInspect.Config.ExposedPorts {
+			keys = append(keys, p)
+		}
+		port = keys[0].Int()
+	}
+	return &port
 }

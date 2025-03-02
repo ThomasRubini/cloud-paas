@@ -3,7 +3,6 @@ package logic
 import (
 	"fmt"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/deploy"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/imgbuild"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 )
@@ -20,10 +19,11 @@ func HandleRepositoryUpdate(project models.DBProject) error {
 	}
 
 	// Redeploy using the new image
-	err = deploy.DeployApp(project)
+	panic("Thomas appelle ça")
+	/*err = deploy.DeployApp(project)
 	if err != nil {
 		return fmt.Errorf("error deploying app: %v", err)
 	}
-
 	return nil
+	*/
 }

@@ -7,6 +7,7 @@ import (
 )
 
 type DBProject struct {
+	// Immutable ([A-Z][a-z][0-9]-)+
 	Name           string
 	Desc           string
 	SourceURL      string

@@ -1,6 +1,6 @@
 package models
 
-type DBDeployment struct {
+type DBEnvironment struct {
 	ParentProject DBApplication
 	Domain        string
 	Environement  string

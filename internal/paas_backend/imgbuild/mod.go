@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/jsonmessage"
+	"github.com/sirupsen/logrus"
 )
 
 type BuildError struct {
@@ -24,7 +25,7 @@ func (e *BuildError) Error() string {
 // Builds an image from a directory containing a Dockerfile, and assigns it the given tags
 // On error, returns logs from the build process
 func Build(buildContextPath string, tags []string) error {
-
+	logrus.Debugf("Building image at %s", buildContextPath)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {

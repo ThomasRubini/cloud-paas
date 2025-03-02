@@ -24,7 +24,7 @@ func (e *BuildError) Error() string {
 
 // Builds an image from a directory containing a Dockerfile, and assigns it the given tags
 // On error, returns logs from the build process
-func Build(buildContextPath string, tags []string) error {
+func Build(buildContextPath string, tag string) error {
 	logrus.Debugf("Building image at %s", buildContextPath)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
@@ -33,10 +33,9 @@ func Build(buildContextPath string, tags []string) error {
 	}
 
 	buildOpts := types.ImageBuildOptions{
-		Tags: tags,
+		Tags: []string{tag},
 	}
 
-	//Archivage par la CLI ou le serveur ???
 	buildCtx, err := archive.TarWithOptions(buildContextPath, &archive.TarOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to tar build context - %s", err)

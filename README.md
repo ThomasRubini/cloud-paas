@@ -5,7 +5,7 @@ Test coverage: [![codecov](https://codecov.io/gh/ThomasRubini/cloud-paas/graph/b
 # Setup the the dev environment
 
 # Set up pre-commit
-- `go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.5`
+- `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest`
 - `pipx install pre-commit`
 - `pre-commit install`
 

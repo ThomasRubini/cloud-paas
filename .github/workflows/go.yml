@@ -26,6 +26,7 @@ jobs:
     
     - name: Run pre-commit
       run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
         pipx install pre-commit
         pre-commit run --all-files
 

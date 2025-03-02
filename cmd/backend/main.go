@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/imgbuild"
 )
 
@@ -12,6 +13,5 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println("Hey")
-	// paas_backend.Entrypoint()
+	paas_backend.Entrypoint()
 }

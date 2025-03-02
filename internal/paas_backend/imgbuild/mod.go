@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -30,7 +29,7 @@ func Build(buildContextPath string, tag string) error {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
-		log.Fatalf("cli error - %s", err)
+		logrus.Fatalf("cli error - %s", err)
 	}
 
 	buildOpts := types.ImageBuildOptions{
@@ -66,22 +65,25 @@ func GetExposedPort(tag string) *int {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
-		log.Fatalf("cli error - %s", err)
+		logrus.Errorf("Docker client error - %s", err)
 		return nil
 	}
 	imageInspect, _, err := cli.ImageInspectWithRaw(ctx, tag)
 	if err != nil {
-		log.Fatalf("inspect error - %s", err)
+		logrus.Errorf("Docker inspect error - %s", err)
 		return nil
 	}
 
-	var port int
-	if len(imageInspect.Config.ExposedPorts) > 0 {
-		keys := make([]nat.Port, 0, len(imageInspect.Config.ExposedPorts))
-		for p := range imageInspect.Config.ExposedPorts {
+	exposedPorts := imageInspect.Config.ExposedPorts
+	if len(exposedPorts) == 1 {
+		keys := make([]nat.Port, 0, len(exposedPorts))
+		for p := range exposedPorts {
 			keys = append(keys, p)
 		}
-		port = keys[0].Int()
+		port := keys[0].Int()
+		return &port
+	} else if len(exposedPorts) > 1 {
+		logrus.Warnf("Docker inspect warning - more than one exposed port in image")
 	}
-	return &port
+	return nil
 }

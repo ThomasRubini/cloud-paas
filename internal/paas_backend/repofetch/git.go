@@ -23,7 +23,7 @@ func getAuth(project models.DBProject) transport.AuthMethod {
 }
 
 func initRepoIfNotExists(project models.DBProject, dir string) error {
-	repo, err := git.PlainInit(dir, true)
+	repo, err := git.PlainInit(dir, false)
 	if err != nil {
 		return fmt.Errorf("error initializing repository: %v", err)
 	}
@@ -44,7 +44,12 @@ func fetchRepoChanges(project models.DBProject, dir string) error {
 		return fmt.Errorf("error opening repository: %v", err)
 	}
 
-	err = repo.Fetch(&git.FetchOptions{
+	w, err := repo.Worktree()
+	if err != nil {
+		return fmt.Errorf("error getting worktree: %v", err)
+	}
+
+	err = w.Pull(&git.PullOptions{
 		RemoteName: "origin",
 		Auth:       getAuth(project),
 	})

@@ -47,7 +47,7 @@ func handleRepositories() error {
 	for _, project := range projects {
 		err := handleRepository(project)
 		if err != nil {
-			logrus.Errorf("Error pulling repository for project %v: %v", project, err)
+			logrus.Errorf("Error handling cron update for project %v: %v", project, err)
 		}
 	}
 

@@ -20,7 +20,7 @@ Inputs:
   - Image
   - TCP Port exposed inside the image
 */
-func DeployApp(deployment models.DBDeployment, imageTag string, namespace string, hostHeader string, exposedPort int) error {
+func DeployApp(deployment models.DBDeployment, imageTag string, namespace string, exposedPort int) error {
 	/* TL;DR
 	I. Build Deployement
 		1. Get image

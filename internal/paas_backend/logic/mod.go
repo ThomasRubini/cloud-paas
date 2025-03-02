@@ -8,7 +8,7 @@ import (
 )
 
 // Event called when a repository is updated
-func HandleRepositoryUpdate(project models.DBProject) error {
+func HandleRepositoryUpdate(project models.DBApplication) error {
 	// At this point the repository as already been updated
 
 	// Rebuild the image using the updated repository

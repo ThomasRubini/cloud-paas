@@ -20,7 +20,7 @@ func isDir(path string) bool {
 }
 
 // called on every repository on a schedule to pull them and update them
-func handleRepository(project models.DBProject) error {
+func handleRepository(project models.DBApplication) error {
 	err := pullRepository(project)
 	if err != nil {
 		return fmt.Errorf("error pulling repository: %v", err)
@@ -37,8 +37,8 @@ func handleRepository(project models.DBProject) error {
 func handleRepositories() error {
 	logrus.Info("Pulling repositories at", time.Now())
 
-	var projects []models.DBProject
-	res := state.Get().Db.Model(&models.DBProject{}).Find(&projects)
+	var projects []models.DBApplication
+	res := state.Get().Db.Model(&models.DBApplication{}).Find(&projects)
 	if res.Error != nil {
 		return fmt.Errorf("error fetching project names: %v", res.Error)
 	}

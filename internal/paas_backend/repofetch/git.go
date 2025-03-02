@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getAuth(project models.DBProject) transport.AuthMethod {
+func getAuth(project models.DBApplication) transport.AuthMethod {
 	if project.SourcePassword != "" {
 		return &http.BasicAuth{
 			Username: project.SourceUsername,
@@ -22,7 +22,7 @@ func getAuth(project models.DBProject) transport.AuthMethod {
 	return nil
 }
 
-func initRepoIfNotExists(project models.DBProject, dir string) error {
+func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	repo, err := git.PlainInit(dir, false)
 	if err != nil {
 		return fmt.Errorf("error initializing repository: %v", err)
@@ -38,7 +38,7 @@ func initRepoIfNotExists(project models.DBProject, dir string) error {
 	return nil
 }
 
-func fetchRepoChanges(project models.DBProject, dir string) error {
+func fetchRepoChanges(project models.DBApplication, dir string) error {
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
@@ -59,7 +59,7 @@ func fetchRepoChanges(project models.DBProject, dir string) error {
 	return nil
 }
 
-func pullRepository(project models.DBProject) error {
+func pullRepository(project models.DBApplication) error {
 	dir := project.GetPath()
 
 	logrus.Debugf("Pulling repository %v at %v", project.Name, dir)

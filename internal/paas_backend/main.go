@@ -25,7 +25,7 @@ func connectToDB() (*gorm.DB, error) {
 	}
 	logrus.Debug("Connected to database !")
 
-	models := []interface{}{models.DBProject{}}
+	models := []interface{}{models.DBApplication{}}
 
 	logrus.Debug("Running database migrations..")
 	for _, model := range models {

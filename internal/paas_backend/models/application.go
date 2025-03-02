@@ -6,7 +6,7 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 )
 
-type DBProject struct {
+type DBApplication struct {
 	// Immutable ([A-Z][a-z][0-9]-)+
 	Name           string
 	Desc           string
@@ -16,7 +16,7 @@ type DBProject struct {
 	AutoDeploy     bool
 }
 
-func (p DBProject) GetPath() string {
+func (p DBApplication) GetPath() string {
 	rootPath := config.Get().REPO_DIR
 	// TODO use project ID for folder
 	return path.Join(rootPath, p.Name)

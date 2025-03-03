@@ -16,7 +16,7 @@ func initProjects(g *gin.RouterGroup) {
 // @Produce      json
 // @Success      200
 // @Router       /api/v1/projects [get]
-// @Success      200 {array} models.DBProject
+// @Success      200 {array} models.DBApplication
 func getProjects(c *gin.Context) {
 	projects := []models.DBApplication{
 		{Name: "Project1", Desc: "Description1", SourceURL: "http://source1.com"},

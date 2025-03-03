@@ -30,7 +30,7 @@ func connectToDB() (*gorm.DB, error) {
 	logrus.Debug("Running database migrations..")
 	for _, model := range models {
 		if db.AutoMigrate(model) != nil {
-			return nil, fmt.Errorf("failed to run database migrations for model %v", model)
+			return nil, fmt.Errorf("failed to run database migrations for model %v: %w", model, err)
 		}
 	}
 

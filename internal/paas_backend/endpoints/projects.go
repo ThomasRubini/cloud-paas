@@ -18,10 +18,13 @@ func initProjects(g *gin.RouterGroup) {
 // @Router       /api/v1/projects [get]
 // @Success      200 {array} models.DBApplication
 func getProjects(c *gin.Context) {
-	projects := []models.DBApplication{
-		{Name: "Project1", Desc: "Description1", SourceURL: "http://source1.com"},
-		{Name: "Project2", Desc: "Description2", SourceURL: "http://source2.com"},
+	
+	var projects []models.DBApplication
+	
+	if err := state.Get().Db.Find(&projects).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
 	}
-
+	
 	c.JSON(200, projects)
 }

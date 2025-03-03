@@ -7,46 +7,46 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func initProjects(g *gin.RouterGroup) {
-	g.GET("/projects", getProjects)
-	g.POST("/projects", createProject)
+func initApplications(g *gin.RouterGroup) {
+	g.GET("/applications", getApps)
+	g.POST("/applications", createApp)
 }
 
-// GetProjects godoc
-// @Summary      List projects you have access to
-// @Tags         projects
+// GetApplications godoc
+// @Summary      List applications you have access to
+// @Tags         applications
 // @Produce      json
 // @Success      200
-// @Router       /api/v1/projects [get]
+// @Router       /api/v1/applications [get]
 // @Success      200 {array} models.DBApplication
-func getProjects(c *gin.Context) {
+func getApps(c *gin.Context) {
 
-	var projects []models.DBApplication
+	var apps []models.DBApplication
 
-	if err := state.Get().Db.Find(&projects).Error; err != nil {
+	if err := state.Get().Db.Find(&apps).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(200, projects)
+	c.JSON(200, apps)
 }
 
-// PostProjects godoc
-// @Summary      Create a new project
-// @Tags         projects
+// Postapplications godoc
+// @Summary      Create a new application
+// @Tags         applications
 // @Accept       json
-// @Param        project body models.DBApplication true "Project to create"
+// @Param        application body models.DBApplication true "application to create"
 // @Success      200
-// @Router       /api/v1/projects [post]
-func createProject(c *gin.Context) {
-	var newProject models.DBApplication
+// @Router       /api/v1/applications [post]
+func createApp(c *gin.Context) {
+	var newApp models.DBApplication
 
-	if err := c.ShouldBindJSON(&newProject); err != nil {
+	if err := c.ShouldBindJSON(&newApp); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := state.Get().Db.Create(&newProject).Error; err != nil {
+	if err := state.Get().Db.Create(&newApp).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

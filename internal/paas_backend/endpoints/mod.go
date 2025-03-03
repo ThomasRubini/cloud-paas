@@ -6,6 +6,6 @@ import (
 )
 
 func Init(g *gin.RouterGroup) {
-	initProjects(g)
+	initApplications(g)
 	initRegister(g)
 }

@@ -12,6 +12,7 @@ import (
 func initApplications(g *gin.RouterGroup) {
 	g.GET("/applications", getApps)
 	g.POST("/applications", createApp)
+	g.DELETE("/applications/:id", deleteApp)
 }
 
 type AppView struct {
@@ -87,4 +88,31 @@ func createApp(c *gin.Context) {
 
 	logrus.Debugf("Created new application with ID %d", newApp.ID)
 	c.JSON(200, IdResponse{ID: newApp.ID})
+}
+
+// DeleteApplication godoc
+// @Summary      Delete an application
+// @Tags         applications
+// @Param        id path int true "Application ID"
+// @Success      200
+// @Router       /api/v1/applications/{id} [delete]
+func deleteApp(c *gin.Context) {
+	appId := c.Param("id")
+	if appId == "" {
+		c.JSON(400, gin.H{"error": "missing id"})
+		return
+	}
+
+	var app models.DBApplication
+	if err := state.Get().Db.First(&app, appId).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := state.Get().Db.Delete(&app).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(200)
 }

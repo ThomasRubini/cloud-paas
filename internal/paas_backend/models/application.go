@@ -4,9 +4,11 @@ import (
 	"path"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"gorm.io/gorm"
 )
 
 type DBApplication struct {
+	gorm.Model
 	// Immutable ([A-Z][a-z][0-9]-)+
 	Name           string
 	Desc           string

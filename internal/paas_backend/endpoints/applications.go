@@ -1,10 +1,13 @@
 package endpoints
 
 import (
+	"errors"
+
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
@@ -118,7 +121,11 @@ func deleteApp(c *gin.Context) {
 
 	var app models.DBApplication
 	if err := state.Get().Db.First(&app, appId).Error; err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "application not found"})
+		} else {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -147,7 +154,11 @@ func updateApp(c *gin.Context) {
 
 	var app models.DBApplication
 	if err := state.Get().Db.First(&app, appId).Error; err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "application not found"})
+		} else {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

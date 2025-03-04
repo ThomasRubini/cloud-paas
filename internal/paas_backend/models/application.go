@@ -27,12 +27,24 @@ func (p DBApplication) GetPath() string {
 func (p DBApplication) SetSourceCredentials(username, password string) error {
 	sp := state.Get().SecretsProvider
 
-	if err := sp.SetSecret(fmt.Sprintf("%v.username", p.ID), username); err != nil {
-		return fmt.Errorf("could not set source username: %v", err)
-	}
+	if username == "" && password == "" {
+		// Delete
+		if err := sp.DeleteSecret(fmt.Sprintf("%v.username", p.ID)); err != nil {
+			return fmt.Errorf("could not delete source username: %v", err)
+		}
 
-	if err := sp.SetSecret(fmt.Sprintf("%v.password", p.ID), password); err != nil {
-		return fmt.Errorf("could not set source password: %v", err)
+		if err := sp.DeleteSecret(fmt.Sprintf("%v.password", p.ID)); err != nil {
+			return fmt.Errorf("could not delete source password: %v", err)
+		}
+	} else {
+		// Set
+		if err := sp.SetSecret(fmt.Sprintf("%v.username", p.ID), username); err != nil {
+			return fmt.Errorf("could not set source username: %v", err)
+		}
+
+		if err := sp.SetSecret(fmt.Sprintf("%v.password", p.ID), password); err != nil {
+			return fmt.Errorf("could not set source password: %v", err)
+		}
 	}
 
 	return nil

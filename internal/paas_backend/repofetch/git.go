@@ -12,14 +12,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getAuth(project models.DBApplication) transport.AuthMethod {
-	if project.SourcePassword != "" {
-		return &http.BasicAuth{
-			Username: project.SourceUsername,
-			Password: project.SourcePassword,
-		}
+func getAuth(project models.DBApplication) (transport.AuthMethod, error) {
+	username, password, err := project.GetSourceCredentials()
+	if err != nil {
+		return nil, fmt.Errorf("error getting source credentials: %v", err)
 	}
-	return nil
+
+	return &http.BasicAuth{
+		Username: username,
+		Password: password,
+	}, nil
 }
 
 func initRepoIfNotExists(project models.DBApplication, dir string) error {
@@ -49,9 +51,14 @@ func fetchRepoChanges(project models.DBApplication, dir string) error {
 		return fmt.Errorf("error getting worktree: %v", err)
 	}
 
+	auth, err := getAuth(project)
+	if err != nil {
+		return fmt.Errorf("error getting auth: %v", err)
+	}
+
 	err = w.Pull(&git.PullOptions{
 		RemoteName: "origin",
-		Auth:       getAuth(project),
+		Auth:       auth,
 	})
 	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return fmt.Errorf("error fetching repository: %v", err)

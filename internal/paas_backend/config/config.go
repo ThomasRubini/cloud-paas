@@ -19,6 +19,9 @@ type Config struct {
 	OIDC_USER_ID           string `env:"OIDC_USER_ID"`
 	OIDC_USER_PASSWORD     string `env:"OIDC_USER_PASSWORD"`
 	OIDC_REALM             string `env:"OIDC_REALM"`
+
+	SECRETS_IMPL      string `env:"SECRETS_IMPL"`
+	SECRETS_IMPL_FILE string `env:"SECRETS_IMPL_FILE" envDefault:""`
 }
 
 var configInst *Config

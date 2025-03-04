@@ -1,11 +1,13 @@
 package state
 
 import (
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"gorm.io/gorm"
 )
 
 type T struct {
-	Db *gorm.DB
+	Db              *gorm.DB
+	SecretsProvider secretsprovider.SecretsProvider
 }
 
 var state *T

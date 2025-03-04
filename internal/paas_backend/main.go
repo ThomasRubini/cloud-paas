@@ -9,6 +9,7 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/endpoints"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 
 	"github.com/sirupsen/logrus"
@@ -56,6 +57,21 @@ func setupLogging() {
 	logrus.Trace("Trace logging enabled")
 }
 
+func getSecretsProvider() secretsprovider.SecretsProvider {
+	c := config.Get()
+	impl := c.SECRETS_IMPL
+	if impl == "file" {
+		if c.SECRETS_IMPL_FILE == "" {
+			panic("file secrets backend chosen but SECRETS_IMPL_FILE environment variable not set")
+		}
+		return secretsprovider.FromFile(c.SECRETS_IMPL_FILE)
+	} else if impl == "vault" {
+		panic("TODO")
+	} else {
+		panic("Currently supported secrets backends: [file, vault]")
+	}
+}
+
 func Entrypoint() {
 	config.Init()
 	setupLogging()
@@ -68,7 +84,8 @@ func Entrypoint() {
 
 	// Setup state
 	state.Set(state.T{
-		Db: db,
+		Db:              db,
+		SecretsProvider: getSecretsProvider(),
 	})
 
 	// Setup web server

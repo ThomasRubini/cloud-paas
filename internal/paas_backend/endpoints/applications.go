@@ -81,10 +81,22 @@ func createApp(c *gin.Context) {
 	var newApp models.DBApplication
 	utils.CopyFields(&request, &newApp)
 
+	// Create in DB
 	resp := state.Get().Db.Create(&newApp)
 	if err := resp.Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Store credentials
+
+	// Update credentials
+	if request.SourceUsername != "" || request.SourcePassword != "" {
+		err := newApp.SetSourceCredentials(request.SourceUsername, request.SourcePassword)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	logrus.Debugf("Created new application with ID %d", newApp.ID)
@@ -147,10 +159,20 @@ func updateApp(c *gin.Context) {
 
 	utils.CopyFields(&request, &app)
 
+	// Update db
 	db := state.Get().Db
 	if err := db.Model(&app).Updates(&request).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Update credentials
+	if request.SourceUsername != "" || request.SourcePassword != "" {
+		err := app.SetSourceCredentials(request.SourceUsername, request.SourcePassword)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.Status(200)

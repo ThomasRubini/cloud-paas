@@ -32,14 +32,7 @@ func (fsp *FileSecretsProvider) readData() (map[string]string, error) {
 	return secrets, nil
 }
 
-func (fsp *FileSecretsProvider) SetSecret(key, value string) error {
-	secrets, err := fsp.readData()
-	if err != nil {
-		return fmt.Errorf("could not read secrets file: %v", err)
-	}
-
-	secrets[key] = value
-
+func (fsp *FileSecretsProvider) writeData(secrets map[string]string) error {
 	data, err := json.Marshal(secrets)
 	if err != nil {
 		return err
@@ -48,6 +41,20 @@ func (fsp *FileSecretsProvider) SetSecret(key, value string) error {
 	err = os.WriteFile(fsp.filePath, data, 0644)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+func (fsp *FileSecretsProvider) SetSecret(key, value string) error {
+	secrets, err := fsp.readData()
+	if err != nil {
+		return fmt.Errorf("could not read secrets file: %v", err)
+	}
+
+	secrets[key] = value
+
+	if fsp.writeData(secrets) != nil {
+		return fmt.Errorf("could not write secrets file: %v", err)
 	}
 
 	return nil
@@ -75,14 +82,8 @@ func (fsp *FileSecretsProvider) DeleteSecret(key string) error {
 
 	delete(secrets, key)
 
-	data, err := json.Marshal(secrets)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(fsp.filePath, data, 0644)
-	if err != nil {
-		return err
+	if fsp.writeData(secrets) != nil {
+		return fmt.Errorf("could not write secrets file: %v", err)
 	}
 
 	return nil

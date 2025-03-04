@@ -13,6 +13,7 @@ func initApplications(g *gin.RouterGroup) {
 	g.GET("/applications", getApps)
 	g.POST("/applications", createApp)
 	g.DELETE("/applications/:id", deleteApp)
+	g.PATCH("/applications/:id", updateApp)
 }
 
 type AppView struct {
@@ -110,6 +111,44 @@ func deleteApp(c *gin.Context) {
 	}
 
 	if err := state.Get().Db.Delete(&app).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(200)
+}
+
+// UpdateApplication godoc
+// @Summary      Update an existing application
+// @Tags         applications
+// @Accept       json
+// @Param        id path int true "Application ID"
+// @Param        application body CreateAppRequest true "application to update"
+// @Success      200
+// @Router       /api/v1/applications/{id} [patch]
+func updateApp(c *gin.Context) {
+	appId := c.Param("id")
+	if appId == "" {
+		c.JSON(400, gin.H{"error": "missing id"})
+		return
+	}
+
+	var app models.DBApplication
+	if err := state.Get().Db.First(&app, appId).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	var request CreateAppRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	utils.CopyFields(&request, &app)
+
+	db := state.Get().Db
+	if err := db.Model(&app).Updates(&request).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

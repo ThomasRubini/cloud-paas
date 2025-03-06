@@ -4,3 +4,9 @@ repos:
     hooks:
       - id: go-fmt
       - id: golangci-lint
+  - repo: local
+    hooks:
+      - id: run-make-backend-docs
+        name: Make backend docs
+        entry: make backend_docs
+        language: system

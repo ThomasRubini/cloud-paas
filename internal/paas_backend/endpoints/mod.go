@@ -9,3 +9,7 @@ func Init(g *gin.RouterGroup) {
 	initApplications(g)
 	initRegister(g)
 }
+
+type IdResponse struct {
+	ID uint `json:"id"`
+}

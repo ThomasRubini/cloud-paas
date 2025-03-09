@@ -11,16 +11,90 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/noerror"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
+	"golang.org/x/term"
 
 	"github.com/urfave/cli/v3"
-	"golang.org/x/term"
 )
 
-// Does not parse response
-// Has 3 return possibilities:
-// - Technical error (returns "", err)
-// - Validation failure in backend (returns "validation error", nil)
-// - Success (returns "", nil)
+var AccountCmd = &cli.Command{
+	Name:  "account",
+	Usage: "Interact with your account",
+	Commands: []*cli.Command{
+		loginCmd,
+		registerCmd,
+	},
+}
+
+var loginCmd = &cli.Command{
+	Name:   "login",
+	Usage:  "login with your account",
+	Action: LoginAction,
+}
+
+var registerCmd = &cli.Command{
+	Name:  "register",
+	Usage: "Register an account against the PaaS",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "user",
+			Usage:   "Username for the account",
+			Aliases: []string{"u", "username"},
+		},
+		&cli.StringFlag{
+			Name:    "password",
+			Usage:   "Password for the account. Warning: this option and will log the password to your shell history. Prefer using stdin to input the password",
+			Aliases: []string{"p", "pass"},
+		},
+	},
+	Action: RegisterAction,
+}
+
+func LoginAction(ctx context.Context, c *cli.Command) error {
+	conf := config.Get()
+	if conf.REFRESH_TOKEN != "" {
+		return fmt.Errorf("already logged in")
+	}
+
+	println("login called")
+	return nil
+}
+
+func RegisterAction(ctx context.Context, c *cli.Command) error {
+	conf := config.Get()
+	if conf.REFRESH_TOKEN != "" {
+		return fmt.Errorf("already logged in")
+	}
+
+	user, password, err := getUserAndPassword(c)
+	if err != nil {
+		return fmt.Errorf("failed to read user and password: %w", err)
+	}
+
+	validationError, err := makeRegisterAccountRequest(user, password)
+	if err != nil {
+		return fmt.Errorf("failed to get token: %w", err)
+	}
+	if validationError != "" {
+		fmt.Printf("Validation error: %v\n", validationError)
+		return nil
+	}
+
+	token, err := makeLoginRequest(user, password)
+	if err != nil {
+		return fmt.Errorf("registration succeeded, but login to get token failed: %w", err)
+	}
+
+	cfg := config.Get()
+	cfg.REFRESH_TOKEN = token
+	err = config.Save(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to save config: %w", err)
+	}
+
+	fmt.Println("Registration successful")
+	return nil
+}
+
 func makeRegisterAccountRequest(user, password string) (string, error) {
 
 	body := map[string]any{
@@ -116,40 +190,4 @@ func makeLoginRequest(user, password string) (string, error) {
 	}
 
 	return r.RefreshToken, nil
-}
-
-func RegisterAction(ctx context.Context, c *cli.Command) error {
-	conf := config.Get()
-	if conf.REFRESH_TOKEN != "" {
-		return fmt.Errorf("already logged in")
-	}
-
-	user, password, err := getUserAndPassword(c)
-	if err != nil {
-		return fmt.Errorf("failed to read user and password: %w", err)
-	}
-
-	validationError, err := makeRegisterAccountRequest(user, password)
-	if err != nil {
-		return fmt.Errorf("failed to get token: %w", err)
-	}
-	if validationError != "" {
-		fmt.Printf("Validation error: %v\n", validationError)
-		return nil
-	}
-
-	token, err := makeLoginRequest(user, password)
-	if err != nil {
-		return fmt.Errorf("registration succeeded, but login to get token failed: %w", err)
-	}
-
-	cfg := config.Get()
-	cfg.REFRESH_TOKEN = token
-	err = config.Save(cfg)
-	if err != nil {
-		return fmt.Errorf("failed to save config: %w", err)
-	}
-
-	fmt.Println("Registration successful")
-	return nil
 }

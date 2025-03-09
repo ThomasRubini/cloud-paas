@@ -15,8 +15,8 @@ import (
 func initApplications(g *gin.RouterGroup) {
 	g.GET("/applications", getApps)
 	g.POST("/applications", createApp)
-	g.DELETE("/applications/:id", deleteApp)
-	g.PATCH("/applications/:id", updateApp)
+	g.DELETE("/applications/:app_id", deleteApp)
+	g.PATCH("/applications/:app_id", updateApp)
 }
 
 type AppView struct {
@@ -51,10 +51,6 @@ func getApps(c *gin.Context) {
 	}
 
 	c.JSON(200, appsViews)
-}
-
-type IdResponse struct {
-	ID uint `json:"id"`
 }
 
 type CreateAppRequest struct {
@@ -109,11 +105,11 @@ func createApp(c *gin.Context) {
 // DeleteApplication godoc
 // @Summary      Delete an application
 // @Tags         applications
-// @Param        id path int true "Application ID"
+// @Param        app_id path string true "Application ID"
 // @Success      200
-// @Router       /api/v1/applications/{id} [delete]
+// @Router       /api/v1/applications/{app_id} [delete]
 func deleteApp(c *gin.Context) {
-	appId := c.Param("id")
+	appId := c.Param("app_id")
 	if appId == "" {
 		c.JSON(400, gin.H{"error": "missing id"})
 		return
@@ -141,12 +137,12 @@ func deleteApp(c *gin.Context) {
 // @Summary      Update an existing application
 // @Tags         applications
 // @Accept       json
-// @Param        id path int true "Application ID"
+// @Param        app_id path string true "Application ID"
 // @Param        application body CreateAppRequest true "application to update"
 // @Success      200
-// @Router       /api/v1/applications/{id} [patch]
+// @Router       /api/v1/applications/{app_id} [patch]
 func updateApp(c *gin.Context) {
-	appId := c.Param("id")
+	appId := c.Param("app_id")
 	if appId == "" {
 		c.JSON(400, gin.H{"error": "missing id"})
 		return

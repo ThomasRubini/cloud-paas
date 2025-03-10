@@ -1,7 +1,11 @@
 package models
 
+import "gorm.io/gorm"
+
 type DBEnvironment struct {
-	ParentProject DBApplication
+	gorm.Model
+	ApplicationID uint          `gorm:"uniqueIndex:idx_env_name"`
+	Application   DBApplication `gorm:"foreignKey:ApplicationID"`
 	Domain        string
-	Environement  string
+	Name          string `gorm:"uniqueIndex:idx_env_name"`
 }

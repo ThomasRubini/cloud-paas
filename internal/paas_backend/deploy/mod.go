@@ -45,7 +45,7 @@ func DeployApp(deployment models.DBEnvironment, imageTag string, namespace strin
 	}
 
 	var replicas int32 = 1
-	var appName = deployment.ParentProject.Name + "-" + deployment.Environement
+	var appName = deployment.Application.Name + "-" + deployment.Name
 
 	deploymentsClient := clientSet.AppsV1().Deployments(apiv1.NamespaceDefault)
 

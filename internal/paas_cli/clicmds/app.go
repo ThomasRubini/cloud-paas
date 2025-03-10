@@ -107,6 +107,17 @@ func GetAppInfoAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func deleteAppAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Deleting %s...\n", cmd.Args().First())
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": cmd.Args().First(),
+	}).Delete("/api/v1/applications/{app_id}")
+	if err != nil {
+		return fmt.Errorf("failed to delete app: %s", err)
+	}
+
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to delete app: %s", resp.String())
+	}
+
+	fmt.Printf("Application deleted successfully\n")
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
@@ -32,21 +33,13 @@ func constructAppFromId(app_id string) *models.DBApplication {
 	return &app
 }
 
-type AppView struct {
-	ID         uint   `json:"id"`
-	Name       string `json:"name"`
-	Desc       string `json:"desc"`
-	SourceURL  string `json:"source_url"`
-	AutoDeploy bool   `json:"auto_deploy"`
-}
-
 // GetApplications godoc
 // @Summary      List applications you have access to
 // @Tags         applications
 // @Produce      json
 // @Success      200
 // @Router       /api/v1/applications [get]
-// @Success      200 {array} AppView
+// @Success      200 {array} comm.AppView
 func getApps(c *gin.Context) {
 
 	var apps []models.DBApplication
@@ -56,9 +49,9 @@ func getApps(c *gin.Context) {
 		return
 	}
 
-	var appsViews []AppView
+	var appsViews []comm.AppView
 	for _, app := range apps {
-		var appView AppView
+		var appView comm.AppView
 		utils.CopyFields(&app, &appView)
 		appsViews = append(appsViews, appView)
 	}
@@ -66,24 +59,15 @@ func getApps(c *gin.Context) {
 	c.JSON(200, appsViews)
 }
 
-type CreateAppRequest struct {
-	Name           string
-	Desc           string
-	SourceURL      string
-	SourceUsername string
-	SourcePassword string
-	AutoDeploy     bool
-}
-
 // Postapplications godoc
 // @Summary      Create a new application
 // @Tags         applications
 // @Accept       json
-// @Param        application body CreateAppRequest true "application to create"
-// @Success      200 {object} IdResponse
+// @Param        application body comm.CreateAppRequest true "application to create"
+// @Success      200 {object} comm.IdResponse
 // @Router       /api/v1/applications [post]
 func createApp(c *gin.Context) {
-	var request CreateAppRequest
+	var request comm.CreateAppRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -112,7 +96,7 @@ func createApp(c *gin.Context) {
 	}
 
 	logrus.Debugf("Created new application with ID %d", newApp.ID)
-	c.JSON(200, IdResponse{ID: newApp.ID})
+	c.JSON(200, comm.IdResponse{ID: newApp.ID})
 }
 
 // DeleteApplication godoc
@@ -142,7 +126,7 @@ func deleteApp(c *gin.Context) {
 // @Tags         applications
 // @Accept       json
 // @Param        app_id path string true "Application ID"
-// @Param        application body CreateAppRequest true "application to update"
+// @Param        application body comm.CreateAppRequest true "application to update"
 // @Success      200
 // @Router       /api/v1/applications/{app_id} [patch]
 func updateApp(c *gin.Context) {
@@ -162,7 +146,7 @@ func updateApp(c *gin.Context) {
 		return
 	}
 
-	var request CreateAppRequest
+	var request comm.CreateAppRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return

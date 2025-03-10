@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/clicmds"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v3"
 )
@@ -29,7 +30,7 @@ func rootBefore(ctx context.Context, c *cli.Command) (context.Context, error) {
 }
 
 func Entrypoint() {
-	//config.Init()
+	config.Init()
 
 	clicmds.RootCmd.Before = rootBefore
 	if err := clicmds.RootCmd.Run(context.Background(), os.Args); err != nil {

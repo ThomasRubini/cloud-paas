@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
@@ -26,12 +27,6 @@ func initEnvironments(g *gin.RouterGroup) {
 	appRouter.PATCH("/:env_name", updateEnv)
 }
 
-type EnvView struct {
-	ID     uint `json:"id"`
-	Domain string
-	Name   string
-}
-
 // GetEnvironments godoc
 // @Summary      List environments associated to this application
 // @Tags         environments
@@ -39,7 +34,7 @@ type EnvView struct {
 // @Success      200
 // @Param		 app_id path string true "Application ID"
 // @Router       /api/v1/applications/{app_id}/environments [get]
-// @Success      200 {array} EnvView
+// @Success      200 {array} comm.EnvView
 func getEnvs(c *gin.Context) {
 	appId := c.Param("app_id")
 
@@ -50,9 +45,9 @@ func getEnvs(c *gin.Context) {
 		return
 	}
 
-	var envViews = make([]EnvView, 0)
+	var envViews = make([]comm.EnvView, 0)
 	for _, env := range envs {
-		var envView EnvView
+		var envView comm.EnvView
 		utils.CopyFields(&env, &envView)
 		envViews = append(envViews, envView)
 	}
@@ -60,21 +55,16 @@ func getEnvs(c *gin.Context) {
 	c.JSON(200, envViews)
 }
 
-type CreateEnvRequest struct {
-	Domain string
-	Name   string
-}
-
 // CreateEnvironment godoc
 // @Summary      Create a new environment
 // @Tags         environments
 // @Accept       json
 // @Param		 app_id path string true "Application ID"
-// @Param        environment body CreateEnvRequest true "environment to create"
-// @Success      200 {object} IdResponse
+// @Param        environment body comm.CreateEnvRequest true "environment to create"
+// @Success      200 {object} comm.IdResponse
 // @Router       /api/v1/applications/{app_id}/environments/ [post]
 func createEnv(c *gin.Context) {
-	var request CreateEnvRequest
+	var request comm.CreateEnvRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -93,7 +83,7 @@ func createEnv(c *gin.Context) {
 	}
 
 	logrus.Debugf("Created new environment with ID %d", newEnv.ID)
-	c.JSON(200, IdResponse{ID: newEnv.ID})
+	c.JSON(200, comm.IdResponse{ID: newEnv.ID})
 }
 
 func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
@@ -156,7 +146,7 @@ func deleteEnv(c *gin.Context) {
 // @Accept       json
 // @Param		 app_id path string true "Application ID"
 // @Param        env_name path string true "Environment name"
-// @Param        environment body CreateEnvRequest true "environment to update"
+// @Param        environment body comm.CreateEnvRequest true "environment to update"
 // @Success      200
 // @Router       /api/v1/applications/{app_id}/environments/{env_name} [patch]
 func updateEnv(c *gin.Context) {
@@ -169,7 +159,7 @@ func updateEnv(c *gin.Context) {
 		return
 	}
 
-	var request CreateEnvRequest
+	var request comm.CreateEnvRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return

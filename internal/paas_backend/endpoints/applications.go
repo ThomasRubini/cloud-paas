@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
@@ -17,6 +18,18 @@ func initApplications(g *gin.RouterGroup) {
 	g.POST("/applications", createApp)
 	g.DELETE("/applications/:app_id", deleteApp)
 	g.PATCH("/applications/:app_id", updateApp)
+}
+
+// Construct an app, guessing if it's "ID" is its databsae ID or its app name
+func constructAppFromId(app_id string) *models.DBApplication {
+	var app models.DBApplication
+	n, err := strconv.Atoi(app_id)
+	if err != nil {
+		app.Name = app_id
+	} else {
+		app.ID = uint(n)
+	}
+	return &app
 }
 
 type AppView struct {
@@ -109,24 +122,15 @@ func createApp(c *gin.Context) {
 // @Success      200
 // @Router       /api/v1/applications/{app_id} [delete]
 func deleteApp(c *gin.Context) {
-	appId := c.Param("app_id")
-	if appId == "" {
-		c.JSON(400, gin.H{"error": "missing id"})
-		return
-	}
+	appConstraint := constructAppFromId(c.Param("app_id"))
 
-	var app models.DBApplication
-	if err := state.Get().Db.First(&app, appId).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(404, gin.H{"error": "application not found"})
-		} else {
-			c.JSON(500, gin.H{"error": err.Error()})
-		}
-		return
-	}
-
-	if err := state.Get().Db.Delete(&app).Error; err != nil {
+	resp := state.Get().Db.Delete(&models.DBApplication{}, appConstraint)
+	if err := resp.Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if resp.RowsAffected == 0 {
+		c.JSON(404, gin.H{"error": "application not found"})
 		return
 	}
 

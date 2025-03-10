@@ -54,11 +54,11 @@ func createAppAction(ctx context.Context, cmd *cli.Command) error {
 	var parsedResp comm.IdResponse
 	resp, err := utils.GetAPIClient().R().SetBody(&app).SetResult(&parsedResp).Post("/api/v1/applications")
 	if err != nil {
-		fmt.Printf("Failed to create app: %s\n", err)
+		return fmt.Errorf("failed to create app: %s", err)
 	}
 
 	if resp.StatusCode() != 200 {
-		fmt.Printf("Failed to create app: %s\n", resp.String())
+		return fmt.Errorf("failed to create app: %s", resp.String())
 	}
 
 	fmt.Printf("Application created successfully (id: %v)\n", parsedResp.ID)
@@ -69,11 +69,11 @@ func GetAppListAction(ctx context.Context, cmd *cli.Command) error {
 	var apps []comm.AppView
 	resp, err := utils.GetAPIClient().R().SetResult(&apps).Get("/api/v1/applications")
 	if err != nil {
-		fmt.Printf("Failed to get app list: %s\n", err)
+		return fmt.Errorf("failed to get app list: %s", err)
 	}
 
 	if resp.StatusCode() != 200 {
-		fmt.Printf("Failed to get app list: %s\n", resp.String())
+		return fmt.Errorf("failed to get app list: %s", resp.String())
 	}
 
 	fmt.Printf("Applications:\n")
@@ -89,11 +89,11 @@ func GetAppInfoAction(ctx context.Context, cmd *cli.Command) error {
 		"app_id": cmd.Args().First(),
 	}).SetResult(&app).Get("/api/v1/applications/{app_id}")
 	if err != nil {
-		fmt.Printf("Failed to get app info: %s\n", err)
+		return fmt.Errorf("failed to get app info: %s", err)
 	}
 
 	if resp.StatusCode() != 200 {
-		fmt.Printf("Failed to get app info: %s\n", resp.String())
+		return fmt.Errorf("failed to get app info: %s", resp.String())
 	}
 
 	fmt.Printf("Application info:\n")

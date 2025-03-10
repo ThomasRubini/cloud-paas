@@ -50,7 +50,7 @@ func getApps(c *gin.Context) {
 		return
 	}
 
-	var appsViews []comm.AppView
+	appsViews := make([]comm.AppView, 0)
 	for _, app := range apps {
 		var appView comm.AppView
 		utils.CopyFields(&app, &appView)

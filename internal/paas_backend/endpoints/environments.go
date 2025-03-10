@@ -45,7 +45,7 @@ func getEnvs(c *gin.Context) {
 		return
 	}
 
-	var envViews = make([]comm.EnvView, 0)
+	envViews := make([]comm.EnvView, 0)
 	for _, env := range envs {
 		var envView comm.EnvView
 		utils.CopyFields(&env, &envView)

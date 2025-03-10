@@ -1,4 +1,4 @@
-package paas_cli
+package clicmds
 
 import (
 	"context"

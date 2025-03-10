@@ -1,4 +1,4 @@
-package paas_cli
+package clicmds
 
 import (
 	"github.com/urfave/cli/v3"
@@ -18,6 +18,4 @@ var RootCmd = &cli.Command{
 		EnvCmd,
 		TokenCmd,
 	},
-
-	Before: rootBefore,
 }

@@ -1,4 +1,4 @@
-package paas_cli
+package utils
 
 import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
@@ -6,7 +6,7 @@ import (
 	"gopkg.in/resty.v1"
 )
 
-func getAPIClient() *resty.Client {
+func GetAPIClient() *resty.Client {
 	r := resty.New()
 	c := config.Get()
 	if c.REFRESH_TOKEN != "" {

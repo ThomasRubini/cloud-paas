@@ -1,4 +1,4 @@
-package paas_cli
+package clicmds
 
 import (
 	"context"
@@ -57,8 +57,7 @@ var envDeleteCmd = &cli.Command{
 
 func EnvCmdAction(ctx context.Context, cmd *cli.Command) error {
 	appName = cmd.Args().First()
-	subEnvCmd.Run(ctx, cmd.Args().Slice())
-	return nil
+	return subEnvCmd.Run(ctx, cmd.Args().Slice())
 }
 
 func createEnvAction(ctx context.Context, cmd *cli.Command) error {

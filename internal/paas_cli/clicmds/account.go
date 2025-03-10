@@ -1,4 +1,4 @@
-package paas_cli
+package clicmds
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/noerror"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/utils"
 	"golang.org/x/term"
 
 	"github.com/urfave/cli/v3"
@@ -102,7 +103,7 @@ func makeRegisterAccountRequest(user, password string) (string, error) {
 		"password": password,
 	}
 
-	api := getAPIClient()
+	api := utils.GetAPIClient()
 	resp, err := api.R().SetBody(body).Post("/api/v1/register")
 	if err != nil {
 		return "", fmt.Errorf("failed to make request: %w", err)

@@ -6,11 +6,10 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
-	"gorm.io/gorm"
 )
 
 type DBApplication struct {
-	gorm.Model
+	BaseModel
 	// Immutable ([A-Z][a-z][0-9]-)+
 	Name       string `gorm:"unique"`
 	Desc       string

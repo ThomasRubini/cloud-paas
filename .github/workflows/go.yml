@@ -28,6 +28,9 @@ jobs:
       run: |
         go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     
+    - uses: mxschmitt/action-tmate@master
+      name: Setup tmate session
+    
     - name: Run pre-commit
       uses: pre-commit/action@v3.0.1
 

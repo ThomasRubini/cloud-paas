@@ -76,9 +76,13 @@ func GetAppListAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to get app list: %s", resp.String())
 	}
 
-	fmt.Printf("Applications:\n")
-	for _, app := range apps {
-		fmt.Printf("- %v (ID: %v)\n", app.Name, app.ID)
+	if len(apps) == 0 {
+		fmt.Printf("No applications\n")
+	} else {
+		fmt.Printf("Applications:\n")
+		for _, app := range apps {
+			fmt.Printf("- %v (ID: %v)\n", app.Name, app.ID)
+		}
 	}
 	return nil
 }

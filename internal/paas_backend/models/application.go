@@ -12,7 +12,7 @@ import (
 type DBApplication struct {
 	gorm.Model
 	// Immutable ([A-Z][a-z][0-9]-)+
-	Name       string
+	Name       string `gorm:"unique"`
 	Desc       string
 	SourceURL  string
 	AutoDeploy bool

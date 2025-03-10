@@ -24,11 +24,12 @@ jobs:
     - name: Build documentation
       run: make backend_docs
     
-    - name: Run pre-commit
+    - name: Install pre-commit deps
       run: |
         go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-        pipx install pre-commit
-        pre-commit run --all-files
+    
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.1
 
     - name: Build
       run: go build -v ./...

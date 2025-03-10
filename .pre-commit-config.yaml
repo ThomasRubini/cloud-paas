@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: go-fmt
       - id: golangci-lint
+        args: ["--timeout", "180s"]
   - repo: local
     hooks:
       - id: run-make-backend-docs

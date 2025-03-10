@@ -16,6 +16,7 @@ import (
 
 func initApplications(g *gin.RouterGroup) {
 	g.GET("/applications", getApps)
+	g.GET("/applications/:app_id", getApp)
 	g.POST("/applications", createApp)
 	g.DELETE("/applications/:app_id", deleteApp)
 	g.PATCH("/applications/:app_id", updateApp)
@@ -57,6 +58,25 @@ func getApps(c *gin.Context) {
 	}
 
 	c.JSON(200, appsViews)
+}
+
+func getApp(c *gin.Context) {
+	appConstraint := constructAppFromId(c.Param("app_id"))
+
+	var app models.DBApplication
+	if err := state.Get().Db.First(&app, appConstraint).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "application not found"})
+		} else {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	var appView comm.AppView
+	utils.CopyFields(&app, &appView)
+
+	c.JSON(200, appView)
 }
 
 // Postapplications godoc

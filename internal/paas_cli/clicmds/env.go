@@ -16,6 +16,7 @@ var EnvCmd = &cli.Command{
 }
 
 var subEnvCmd = &cli.Command{
+	Name: "env",
 	Commands: []*cli.Command{
 		envCreateCmd,
 		envListCmd,

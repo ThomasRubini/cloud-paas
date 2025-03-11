@@ -12,7 +12,9 @@ COPY internal internal
 COPY cmd cmd
 COPY Makefile .
 
-RUN make backend
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/root/go/pkg/mod \
+    make backend
 
 FROM scratch
 WORKDIR /app

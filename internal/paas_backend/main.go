@@ -13,7 +13,6 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
-	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/tests"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

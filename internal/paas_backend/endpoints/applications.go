@@ -6,7 +6,6 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -42,10 +41,10 @@ func constructAppFromId(app_id string) *models.DBApplication {
 // @Router       /api/v1/applications [get]
 // @Success      200 {array} comm.AppView
 func getApps(c *gin.Context) {
-
+	state := c.MustGet("state").(utils.State)
 	var apps []models.DBApplication
 
-	if err := state.Get().Db.Find(&apps).Error; err != nil {
+	if err := state.Db.Find(&apps).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -61,10 +60,11 @@ func getApps(c *gin.Context) {
 }
 
 func getApp(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	appConstraint := constructAppFromId(c.Param("app_id"))
 
 	var app models.DBApplication
-	if err := state.Get().Db.First(&app, appConstraint).Error; err != nil {
+	if err := state.Db.First(&app, appConstraint).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(404, gin.H{"error": "application not found"})
 		} else {
@@ -87,6 +87,7 @@ func getApp(c *gin.Context) {
 // @Success      200 {object} comm.IdResponse
 // @Router       /api/v1/applications [post]
 func createApp(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	var request comm.CreateAppRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -98,7 +99,7 @@ func createApp(c *gin.Context) {
 	utils.CopyFields(&request, &newApp)
 
 	// Create in DB
-	resp := state.Get().Db.Create(&newApp)
+	resp := state.Db.Create(&newApp)
 	if err := resp.Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -108,7 +109,7 @@ func createApp(c *gin.Context) {
 
 	// Update credentials
 	if request.SourceUsername != "" || request.SourcePassword != "" {
-		err := newApp.SetSourceCredentials(request.SourceUsername, request.SourcePassword)
+		err := state.SecretsProvider.SetSourceCredentials(newApp, request.SourceUsername, request.SourcePassword)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
@@ -126,9 +127,10 @@ func createApp(c *gin.Context) {
 // @Success      200
 // @Router       /api/v1/applications/{app_id} [delete]
 func deleteApp(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	appConstraint := constructAppFromId(c.Param("app_id"))
 
-	resp := state.Get().Db.Delete(&models.DBApplication{}, appConstraint)
+	resp := state.Db.Delete(&models.DBApplication{}, appConstraint)
 	if err := resp.Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -150,6 +152,7 @@ func deleteApp(c *gin.Context) {
 // @Success      200
 // @Router       /api/v1/applications/{app_id} [patch]
 func updateApp(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	appId := c.Param("app_id")
 	if appId == "" {
 		c.JSON(400, gin.H{"error": "missing id"})
@@ -157,7 +160,7 @@ func updateApp(c *gin.Context) {
 	}
 
 	var app models.DBApplication
-	if err := state.Get().Db.First(&app, appId).Error; err != nil {
+	if err := state.Db.First(&app, appId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(404, gin.H{"error": "application not found"})
 		} else {
@@ -175,15 +178,14 @@ func updateApp(c *gin.Context) {
 	utils.CopyFields(&request, &app)
 
 	// Update db
-	db := state.Get().Db
-	if err := db.Model(&app).Updates(&request).Error; err != nil {
+	if err := state.Db.Model(&app).Updates(&request).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Update credentials
 	if request.SourceUsername != "" || request.SourcePassword != "" {
-		err := app.SetSourceCredentials(request.SourceUsername, request.SourcePassword)
+		err := state.SecretsProvider.SetSourceCredentials(app, request.SourceUsername, request.SourcePassword)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return

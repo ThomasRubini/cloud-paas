@@ -10,8 +10,9 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 
+	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/tests"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -58,14 +59,14 @@ func setupLogging() {
 	logrus.Trace("Trace logging enabled")
 }
 
-func getSecretsProvider() secretsprovider.SecretsProvider {
+func getSecretsProvider() secretsprovider.Helper {
 	c := config.Get()
 	impl := c.SECRETS_IMPL
 	if impl == "file" {
 		if c.SECRETS_IMPL_FILE == "" {
 			panic("file secrets backend chosen but SECRETS_IMPL_FILE environment variable not set")
 		}
-		return secretsprovider.FromFile(c.SECRETS_IMPL_FILE)
+		return secretsprovider.Helper{Core: secretsprovider.FromFile(c.SECRETS_IMPL_FILE)}
 	} else if impl == "vault" {
 		panic("TODO")
 	} else {
@@ -83,14 +84,15 @@ func Entrypoint() {
 		logrus.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Setup state
-	state.Set(state.T{
+	// Setup state (note: we assign to the global variable here)
+	state := utils.State{
 		Db:              db,
 		SecretsProvider: getSecretsProvider(),
-	})
+	}
+	utils.SetState(state)
 
 	// Setup web server
-	g := setupWebServer()
+	g := SetupWebServer(state)
 	endpoints.Init(g.Group("/api/v1"))
 
 	// init crontab for fetching repos

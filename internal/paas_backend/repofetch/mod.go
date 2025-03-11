@@ -7,7 +7,7 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,8 +20,8 @@ func isDir(path string) bool {
 }
 
 // called on every repository on a schedule to pull them and update them
-func handleRepository(project models.DBApplication) error {
-	err := pullRepository(project)
+func handleRepository(state utils.State, project models.DBApplication) error {
+	err := pullRepository(state, project)
 	if err != nil {
 		return fmt.Errorf("error pulling repository: %v", err)
 	}
@@ -37,15 +37,18 @@ func handleRepository(project models.DBApplication) error {
 func handleRepositories() error {
 	logrus.Info("Pulling repositories at", time.Now())
 
+	// Get state
+	state := utils.GetState()
+
 	var projects []models.DBApplication
-	res := state.Get().Db.Model(&models.DBApplication{}).Find(&projects)
+	res := state.Db.Model(&models.DBApplication{}).Find(&projects)
 	if res.Error != nil {
 		return fmt.Errorf("error fetching project names: %v", res.Error)
 	}
 	logrus.Infof("Found %d projects to pull", len(projects))
 
 	for _, project := range projects {
-		err := handleRepository(project)
+		err := handleRepository(state, project)
 		if err != nil {
 			logrus.Errorf("Error handling cron update for project %v: %v", project, err)
 		}

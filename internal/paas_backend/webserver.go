@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/middlewares"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -12,10 +13,18 @@ import (
 	"github.com/swaggo/swag"
 )
 
-func createWebServer() *gin.Engine {
+func useState(state utils.State) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("state", state)
+		c.Next()
+	}
+}
+
+func createWebServer(state utils.State) *gin.Engine {
 	g := gin.New()
 
 	g.Use(gin.Recovery())
+	g.Use(useState(state))
 	g.Use(middlewares.Log)
 
 	g.GET("/", func(c *gin.Context) {
@@ -25,8 +34,8 @@ func createWebServer() *gin.Engine {
 	return g
 }
 
-func setupWebServer() *gin.Engine {
-	g := createWebServer()
+func SetupWebServer(state utils.State) *gin.Engine {
+	g := createWebServer(state)
 	setupSwag(g)
 	return g
 }

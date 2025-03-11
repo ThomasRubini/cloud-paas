@@ -2,7 +2,31 @@ package utils
 
 import (
 	"reflect"
+
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
+	"gorm.io/gorm"
 )
+
+type State struct {
+	Db              *gorm.DB
+	SecretsProvider secretsprovider.Helper
+}
+
+var state *State
+
+func GetState() State {
+	if state == nil {
+		panic("state not set")
+	}
+	return *state
+}
+
+func SetState(s State) {
+	if state != nil {
+		panic("state already set")
+	}
+	state = &s
+}
 
 func IsStatusCodeOk(statusCode int) bool {
 	return statusCode >= 200 && statusCode < 300

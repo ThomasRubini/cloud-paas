@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/go-git/go-git/v5"
 	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/transport"
@@ -12,8 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func getAuth(project models.DBApplication) (transport.AuthMethod, error) {
-	username, password, err := project.GetSourceCredentials()
+func getAuth(state utils.State, project models.DBApplication) (transport.AuthMethod, error) {
+	username, password, err := state.SecretsProvider.GetSourceCredentials(project)
 	if err != nil {
 		return nil, fmt.Errorf("error getting source credentials: %v", err)
 	}
@@ -40,7 +41,7 @@ func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func fetchRepoChanges(project models.DBApplication, dir string) error {
+func fetchRepoChanges(state utils.State, project models.DBApplication, dir string) error {
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
@@ -51,7 +52,7 @@ func fetchRepoChanges(project models.DBApplication, dir string) error {
 		return fmt.Errorf("error getting worktree: %v", err)
 	}
 
-	auth, err := getAuth(project)
+	auth, err := getAuth(state, project)
 	if err != nil {
 		return fmt.Errorf("error getting auth: %v", err)
 	}
@@ -66,7 +67,7 @@ func fetchRepoChanges(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func pullRepository(project models.DBApplication) error {
+func pullRepository(state utils.State, project models.DBApplication) error {
 	dir := project.GetPath()
 
 	logrus.Debugf("Pulling repository %v at %v", project.Name, dir)
@@ -78,7 +79,7 @@ func pullRepository(project models.DBApplication) error {
 		}
 	}
 
-	err := fetchRepoChanges(project, dir)
+	err := fetchRepoChanges(state, project, dir)
 	if err != nil {
 		return err
 	}

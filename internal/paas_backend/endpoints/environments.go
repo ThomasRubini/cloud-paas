@@ -6,7 +6,6 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/state"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -36,17 +35,18 @@ func initEnvironments(g *gin.RouterGroup) {
 // @Router       /api/v1/applications/{app_id}/environments [get]
 // @Success      200 {array} comm.EnvView
 func getEnvs(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	appConstraints := constructAppFromId(c.Param("app_id"))
 
 	var envs []models.DBEnvironment
 
 	var app models.DBApplication
-	if err := state.Get().Db.First(&app, appConstraints).Error; err != nil {
+	if err := state.Db.First(&app, appConstraints).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := state.Get().Db.Where("application_id = ?", app.ID).Find(&envs).Error; err != nil {
+	if err := state.Db.Where("application_id = ?", app.ID).Find(&envs).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -70,6 +70,7 @@ func getEnvs(c *gin.Context) {
 // @Success      200 {object} comm.IdResponse
 // @Router       /api/v1/applications/{app_id}/environments/ [post]
 func createEnv(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	appConstraints := constructAppFromId(c.Param("app_id"))
 
 	var request comm.CreateEnvRequest
@@ -79,7 +80,7 @@ func createEnv(c *gin.Context) {
 	}
 
 	var app models.DBApplication
-	if err := state.Get().Db.First(&app, appConstraints).Error; err != nil {
+	if err := state.Db.First(&app, appConstraints).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -89,7 +90,7 @@ func createEnv(c *gin.Context) {
 	utils.CopyFields(&request, &newEnv)
 
 	// Create in DB
-	resp := state.Get().Db.Create(&newEnv)
+	resp := state.Db.Create(&newEnv)
 	if err := resp.Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -100,6 +101,7 @@ func createEnv(c *gin.Context) {
 }
 
 func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
+	state := c.MustGet("state").(utils.State)
 	appId := c.Param("app_id")
 	if appId == "" {
 		c.JSON(400, gin.H{"error": "missing id"})
@@ -113,7 +115,7 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 	}
 
 	var env models.DBEnvironment
-	if err := state.Get().Db.Where("application_id = ? AND name = ?", appId, envName).First(&env).Error; err != nil {
+	if err := state.Db.Where("application_id = ? AND name = ?", appId, envName).First(&env).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		} else {
@@ -131,6 +133,7 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 // @Success      200
 // @Router       /api/v1/applications/{app_id}/environments/{env_name} [delete]
 func deleteEnv(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	env, err := getDBEnv(c)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -145,7 +148,7 @@ func deleteEnv(c *gin.Context) {
 		Name:          c.Param("env_name"),
 	}
 
-	if err := state.Get().Db.Delete(&models.DBEnvironment{}, &envToDelete).Error; err != nil {
+	if err := state.Db.Delete(&models.DBEnvironment{}, &envToDelete).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -163,6 +166,7 @@ func deleteEnv(c *gin.Context) {
 // @Success      200
 // @Router       /api/v1/applications/{app_id}/environments/{env_name} [patch]
 func updateEnv(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
 	env, err := getDBEnv(c)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -181,8 +185,7 @@ func updateEnv(c *gin.Context) {
 	utils.CopyFields(&request, &env)
 
 	// Update db
-	db := state.Get().Db
-	if err := db.Model(&env).Updates(&request).Error; err != nil {
+	if err := state.Db.Model(&env).Updates(&request).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

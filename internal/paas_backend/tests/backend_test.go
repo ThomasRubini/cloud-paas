@@ -46,7 +46,7 @@ func TestOneApp(t *testing.T) {
 	data := fromJson[map[string]uint](w.Body)
 	appView.ID = data["id"]
 
-	// GET requets to check if it was inserted
+	// GET request to check if it was inserted
 	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
 	// Check app content + returned id
@@ -74,7 +74,7 @@ func TestMultipleApps(t *testing.T) {
 		appViews[i].ID = data["id"]
 	}
 
-	// GET requets to check if everything was inserted
+	// GET request to check if everything was inserted
 	w := makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
 	// Check app content + returned id
@@ -102,7 +102,7 @@ func TestDeleteApp(t *testing.T) {
 	// Delete app
 	makeOKRequest(t, webServer, "DELETE", fmt.Sprintf("/api/v1/applications/%v", apps[0].ID), nil)
 
-	// GET requets to check if it was deleted
+	// GET request to check if it was deleted
 	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
 	// Check app content + returned id

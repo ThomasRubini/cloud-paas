@@ -19,11 +19,12 @@ func HandleRepositoryUpdate(project models.DBApplication) error {
 	}
 
 	// Redeploy using the new image
-	panic("Thomas appelle ça")
+	// panic("Thomas appelle ça")
 	/*err = deploy.DeployApp(project)
 	if err != nil {
 		return fmt.Errorf("error deploying app: %v", err)
 	}
 	return nil
 	*/
+	return nil
 }

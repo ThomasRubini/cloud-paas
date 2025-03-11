@@ -220,3 +220,42 @@ func TestGetNonExistingApp(t *testing.T) {
 	w := makeRequest(webServer, "GET", "/api/v1/applications/1", nil)
 	assert.Equal(t, 404, w.Code)
 }
+
+func TestUpdateApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	appCreateQuest := comm.CreateAppRequest{
+		Name: "test",
+	}
+	var appView comm.AppView
+	utils.CopyFields(&appCreateQuest, &appView)
+
+	// Insert app
+	w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+	data := fromJson[map[string]uint](w.Body)
+	appView.ID = data["id"]
+
+	// Update app
+	appUpdateQuest := comm.CreateAppRequest{
+		Desc:           "test description",
+		SourceURL:      "https://github.com/a/a",
+		SourceUsername: "user",
+		SourcePassword: "pass",
+		AutoDeploy:     true,
+	}
+
+	// Make PATCH request
+	makeOKRequest(t, webServer, "PATCH", fmt.Sprintf("/api/v1/applications/%v", appView.ID), toJson(appUpdateQuest))
+
+	// GET request to check if it was updated
+	w = makeOKRequest(t, webServer, "GET", fmt.Sprintf("/api/v1/applications/%v", appView.ID), nil)
+
+	// Check app content + returned id
+	var finalApp comm.AppView
+	utils.CopyFields(&appUpdateQuest, &finalApp)
+	finalApp.ID = appView.ID
+	finalApp.Name = "test"
+
+	var app = fromJson[comm.AppView](w.Body)
+	assert.Equal(t, finalApp, app)
+}

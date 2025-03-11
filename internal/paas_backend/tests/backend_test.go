@@ -3,6 +3,8 @@ package tests
 import (
 	"testing"
 
+	"fmt"
+
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
@@ -50,4 +52,32 @@ func TestOneApp(t *testing.T) {
 	// Check app content + returned id
 	var apps = fromJson[[]comm.AppView](w.Body)
 	assert.Equal(t, []comm.AppView{appView}, apps)
+}
+
+func TestDeleteApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	appCreateQuest := comm.CreateAppRequest{
+		Name: "test",
+	}
+	var appView comm.AppView
+	utils.CopyFields(&appCreateQuest, &appView)
+
+	// Insert app
+	makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+
+	// Verify app was inserted
+	w := makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
+	apps := fromJson[[]comm.AppView](w.Body)
+	assert.Equal(t, 1, len(apps))
+
+	// Delete app
+	makeOKRequest(t, webServer, "DELETE", fmt.Sprintf("/api/v1/applications/%v", apps[0].ID), nil)
+
+	// GET requets to check if it was deleted
+	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
+
+	// Check app content + returned id
+	apps = fromJson[[]comm.AppView](w.Body)
+	assert.Equal(t, 0, len(apps))
 }

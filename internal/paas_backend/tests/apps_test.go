@@ -162,3 +162,10 @@ func TestDeleteApp(t *testing.T) {
 	apps = fromJson[[]comm.AppView](w.Body)
 	assert.Equal(t, 0, len(apps))
 }
+
+func TestDeleteNonexistentApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	w := makeRequest(webServer, "DELETE", "/api/v1/applications/1", nil)
+	assert.Equal(t, 404, w.Code)
+}

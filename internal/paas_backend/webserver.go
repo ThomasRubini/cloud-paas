@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/endpoints"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/middlewares"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 
@@ -44,6 +45,7 @@ func SetupWebServer(state utils.State) *gin.Engine {
 	g := createWebServer(state)
 	setupSwag(g)
 	setupHealth(g)
+	endpoints.Init(g.Group("/api/v1"))
 	return g
 }
 

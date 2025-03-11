@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/endpoints"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
@@ -92,7 +91,6 @@ func Entrypoint() {
 
 	// Setup web server
 	g := SetupWebServer(state)
-	endpoints.Init(g.Group("/api/v1"))
 
 	// init crontab for fetching repos
 	repofetch.Init(config.Get().REPO_FETCH_PERIOD_SECS)

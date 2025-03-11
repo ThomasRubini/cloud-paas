@@ -54,6 +54,34 @@ func TestOneApp(t *testing.T) {
 	assert.Equal(t, []comm.AppView{appView}, apps)
 }
 
+func TestMultipleApps(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	createRequests := []comm.CreateAppRequest{
+		{Name: "test1"},
+		{Name: "test2"},
+	}
+
+	var appViews = make([]comm.AppView, len(createRequests))
+	for i, createRequest := range createRequests {
+		utils.CopyFields(&createRequest, &appViews[i])
+	}
+
+	// Make POST requests
+	for i, createRequest := range createRequests {
+		w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(createRequest))
+		data := fromJson[map[string]uint](w.Body)
+		appViews[i].ID = data["id"]
+	}
+
+	// GET requets to check if everything was inserted
+	w := makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
+
+	// Check app content + returned id
+	var apps = fromJson[[]comm.AppView](w.Body)
+	assert.Equal(t, appViews, apps)
+}
+
 func TestDeleteApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 

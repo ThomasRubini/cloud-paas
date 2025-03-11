@@ -45,9 +45,13 @@ var appDeleteCmd = &cli.Command{
 }
 
 func createAppAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Creating %s...\n", cmd.Args().First())
+	appName := cmd.Args().First()
+	if appName == "" {
+		return fmt.Errorf("app name is required")
+	}
+
 	app := comm.CreateAppRequest{
-		Name: cmd.Args().First(),
+		Name: appName,
 		Desc: cmd.String("desc"),
 	}
 
@@ -61,7 +65,7 @@ func createAppAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to create app: %s", resp.String())
 	}
 
-	fmt.Printf("Application created successfully (id: %v)\n", parsedResp.ID)
+	fmt.Printf("Application %s created successfully (id: %v)\n", appName, parsedResp.ID)
 	return nil
 }
 

@@ -36,11 +36,17 @@ func initEnvironments(g *gin.RouterGroup) {
 // @Router       /api/v1/applications/{app_id}/environments [get]
 // @Success      200 {array} comm.EnvView
 func getEnvs(c *gin.Context) {
-	appId := c.Param("app_id")
+	appConstraints := constructAppFromId(c.Param("app_id"))
 
 	var envs []models.DBEnvironment
 
-	if err := state.Get().Db.Where("application_id = ?", appId).Find(&envs).Error; err != nil {
+	var app models.DBApplication
+	if err := state.Get().Db.First(&app, appConstraints).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := state.Get().Db.Where("application_id = ?", app.ID).Find(&envs).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -64,15 +70,22 @@ func getEnvs(c *gin.Context) {
 // @Success      200 {object} comm.IdResponse
 // @Router       /api/v1/applications/{app_id}/environments/ [post]
 func createEnv(c *gin.Context) {
-	var request comm.CreateEnvRequest
+	appConstraints := constructAppFromId(c.Param("app_id"))
 
+	var request comm.CreateEnvRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
+	var app models.DBApplication
+	if err := state.Get().Db.First(&app, appConstraints).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
 	var newEnv models.DBEnvironment
-	newEnv.ApplicationID = parseUInt(c.Param("app_id"))
+	newEnv.ApplicationID = app.ID
 	utils.CopyFields(&request, &newEnv)
 
 	// Create in DB

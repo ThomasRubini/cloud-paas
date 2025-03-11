@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ThomasRubini/cloud-paas/internal/comm"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/utils"
 	"github.com/urfave/cli/v3"
 )
 
@@ -62,12 +64,52 @@ func EnvCmdAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func createEnvAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Creating env %s for application %s...\n", cmd.Args().First(), appName)
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+
+	env := comm.CreateEnvRequest{
+		Name: envName,
+	}
+
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+	}).SetBody(&env).Post("/api/v1/applications/{app_id}/environments")
+	if err != nil {
+		return fmt.Errorf("failed to create env: %s", err)
+	}
+
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to create env: %s", resp.String())
+	}
+
+	fmt.Printf("Environment %s created successfully\n", envName)
 	return nil
 }
 
 func GetEnvListAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Listing all environments for application %s...\n", appName)
+	var envs []comm.EnvView
+	resp, err := utils.GetAPIClient().R().SetResult(&envs).SetPathParams(map[string]string{
+		"app_id": appName,
+	}).Get("/api/v1/applications/{app_id}/environments")
+	if err != nil {
+		return fmt.Errorf("failed to get env list: %s", err)
+	}
+
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to get env list: %s", resp.String())
+	}
+
+	if len(envs) == 0 {
+		fmt.Printf("No environments\n")
+	} else {
+		fmt.Printf("Environments:\n")
+		for _, env := range envs {
+			fmt.Printf("- %v\n", env.Name)
+		}
+	}
+
 	return nil
 }
 
@@ -82,6 +124,21 @@ func editEnvAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func deleteEnvAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Deleting env %s for application %s...\n", cmd.Args().First(), appName)
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+		"env_id": envName,
+	}).Delete("/api/v1/applications/{app_id}/environments/{env_id}")
+	if err != nil {
+		return fmt.Errorf("failed to delete env: %s", err)
+	}
+
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to delete env: %s", resp.String())
+	}
 	return nil
 }

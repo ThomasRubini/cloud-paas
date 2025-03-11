@@ -41,8 +41,8 @@ func TestOneApp(t *testing.T) {
 
 	// Make POST request
 	w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
-	data := fromJson[map[string]interface{}](w.Body)
-	appView.ID = uint(data["id"].(float64))
+	data := fromJson[map[string]uint](w.Body)
+	appView.ID = data["id"]
 
 	// GET requets to check if it was inserted
 	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)

@@ -106,8 +106,6 @@ func createApp(c *gin.Context) {
 	}
 
 	// Store credentials
-
-	// Update credentials
 	if request.SourceUsername != "" || request.SourcePassword != "" {
 		err := state.SecretsProvider.SetSourceCredentials(newApp, request.SourceUsername, request.SourcePassword)
 		if err != nil {

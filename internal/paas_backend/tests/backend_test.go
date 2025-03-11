@@ -36,7 +36,12 @@ func TestOneApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	appCreateQuest := comm.CreateAppRequest{
-		Name: "test",
+		Name:           "test",
+		Desc:           "test description",
+		SourceURL:      "https://github.com/a/a",
+		SourceUsername: "user",
+		SourcePassword: "pass",
+		AutoDeploy:     true,
 	}
 	var appView comm.AppView
 	utils.CopyFields(&appCreateQuest, &appView)
@@ -58,8 +63,28 @@ func TestMultipleApps(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	createRequests := []comm.CreateAppRequest{
-		{Name: "test1"},
-		{Name: "test2"},
+		{
+			Name:           "test1",
+			Desc:           "test1 description",
+			SourceURL:      "https://github.com/a/a",
+			SourceUsername: "user1",
+			SourcePassword: "pass1",
+			AutoDeploy:     true,
+		},
+		// Missing DB fields,
+		{
+			Name:           "test2",
+			SourceUsername: "user2",
+			SourcePassword: "pass2",
+			AutoDeploy:     false,
+		},
+		// Missing auth fields
+		{
+			Name:       "test3",
+			Desc:       "test3 description",
+			SourceURL:  "https://github.com/c/c",
+			AutoDeploy: false,
+		},
 	}
 
 	var appViews = make([]comm.AppView, len(createRequests))

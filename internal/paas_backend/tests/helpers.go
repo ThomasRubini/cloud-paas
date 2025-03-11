@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,8 @@ func fakeState() utils.State {
 	}
 
 	return utils.State{
-		Db: gorm_db,
+		Db:              gorm_db,
+		SecretsProvider: secretsprovider.Helper{Core: secretsprovider.FromFile("/tmp/secrets.json")},
 	}
 }
 

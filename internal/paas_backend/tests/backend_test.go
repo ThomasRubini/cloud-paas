@@ -32,7 +32,30 @@ func TestGetNoApps(t *testing.T) {
 	assert.Equal(t, 0, len(apps))
 }
 
-func TestOneApp(t *testing.T) {
+func TestOneSimpleApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	appCreateQuest := comm.CreateAppRequest{
+		Name:       "test",
+		AutoDeploy: true,
+	}
+	var appView comm.AppView
+	utils.CopyFields(&appCreateQuest, &appView)
+
+	// Make POST request
+	w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+	data := fromJson[map[string]uint](w.Body)
+	appView.ID = data["id"]
+
+	// GET request to check if it was inserted
+	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
+
+	// Check app content + returned id
+	var apps = fromJson[[]comm.AppView](w.Body)
+	assert.Equal(t, []comm.AppView{appView}, apps)
+}
+
+func TestOneComplexApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	appCreateQuest := comm.CreateAppRequest{

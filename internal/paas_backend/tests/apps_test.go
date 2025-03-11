@@ -118,6 +118,23 @@ func TestMultipleApps(t *testing.T) {
 	assert.Equal(t, appViews, apps)
 }
 
+func TestRecreateApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	appCreateQuest := comm.CreateAppRequest{
+		Name: "test",
+	}
+	var appView comm.AppView
+	utils.CopyFields(&appCreateQuest, &appView)
+
+	// Insert app
+	makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+
+	// Insert app again
+	w := makeRequest(webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+	assert.Equal(t, 409, w.Code)
+}
+
 func TestDeleteApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 

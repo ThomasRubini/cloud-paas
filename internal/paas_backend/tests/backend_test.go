@@ -26,8 +26,7 @@ func TestGetNoApps(t *testing.T) {
 	w := makeRequest(webServer, "GET", "/api/v1/applications", nil)
 	assert.Equal(t, 200, w.Code)
 
-	var apps []comm.AppView
-	fromJson(w.Body, &apps)
+	var apps = fromJson[[]comm.AppView](w.Body)
 	assert.Equal(t, 0, len(apps))
 }
 
@@ -42,15 +41,13 @@ func TestOneApp(t *testing.T) {
 
 	// Make POST request
 	w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
-	var data map[string]interface{}
-	fromJson(w.Body, &data)
+	data := fromJson[map[string]interface{}](w.Body)
 	appView.ID = uint(data["id"].(float64))
 
 	// GET requets to check if it was inserted
 	w = makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
 	// Check app content + returned id
-	var apps []comm.AppView
-	fromJson(w.Body, &apps)
+	var apps = fromJson[[]comm.AppView](w.Body)
 	assert.Equal(t, []comm.AppView{appView}, apps)
 }

@@ -57,11 +57,13 @@ func toJson(v interface{}) io.Reader {
 	return bytes.NewBuffer(b)
 }
 
-func fromJson(body io.Reader, v interface{}) {
-	err := json.NewDecoder(body).Decode(v)
+func fromJson[T any](body io.Reader) T {
+	var v T
+	err := json.NewDecoder(body).Decode(&v)
 	if err != nil {
 		panic(err)
 	}
+	return v
 }
 
 func toString(body io.Reader) string {

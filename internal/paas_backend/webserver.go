@@ -34,9 +34,16 @@ func createWebServer(state utils.State) *gin.Engine {
 	return g
 }
 
+func setupHealth(g *gin.Engine) {
+	g.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+}
+
 func SetupWebServer(state utils.State) *gin.Engine {
 	g := createWebServer(state)
 	setupSwag(g)
+	setupHealth(g)
 	return g
 }
 

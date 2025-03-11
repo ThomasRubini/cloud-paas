@@ -169,3 +169,32 @@ func TestDeleteNonexistentApp(t *testing.T) {
 	w := makeRequest(webServer, "DELETE", "/api/v1/applications/1", nil)
 	assert.Equal(t, 404, w.Code)
 }
+
+func TestGetApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	appCreateQuest := comm.CreateAppRequest{
+		Name: "test",
+	}
+	var appView comm.AppView
+	utils.CopyFields(&appCreateQuest, &appView)
+
+	// Insert app
+	w := makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
+	data := fromJson[map[string]uint](w.Body)
+	appView.ID = data["id"]
+
+	// GET request to check if it was inserted
+	w = makeOKRequest(t, webServer, "GET", fmt.Sprintf("/api/v1/applications/%v", appView.ID), nil)
+
+	// Check app content + returned id
+	var app = fromJson[comm.AppView](w.Body)
+	assert.Equal(t, appView, app)
+}
+
+func TestGetNonExistingApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	w := makeRequest(webServer, "GET", "/api/v1/applications/1", nil)
+	assert.Equal(t, 404, w.Code)
+}

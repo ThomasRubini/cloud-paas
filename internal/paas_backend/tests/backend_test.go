@@ -1,11 +1,13 @@
 package tests
 
 import (
+	"io"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -22,12 +24,18 @@ func fakeState() utils.State {
 	}
 }
 
+func makeRequest(webServer *gin.Engine, method string, path string, body io.Reader) *httptest.ResponseRecorder {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(method, path, nil)
+	webServer.ServeHTTP(w, r)
+	return w
+
+}
+
 func TestHealth(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	// Test health URL
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/health", nil)
-	webServer.ServeHTTP(w, r)
+	w := makeRequest(webServer, "GET", "/health", nil)
 	assert.Equal(t, 200, w.Code)
 }

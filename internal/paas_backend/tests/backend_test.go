@@ -13,8 +13,8 @@ func TestHealth(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	// Test health URL
-	w := makeRequest(webServer, "GET", "/health", nil)
-	assert.Equal(t, 200, w.Code)
+	w := makeOKRequest(t, webServer, "GET", "/health", nil)
+	assert.Equal(t, "OK", toString(w.Body))
 
 	w = makeRequest(webServer, "GET", "/nonexistent", nil)
 	assert.Equal(t, 404, w.Code)

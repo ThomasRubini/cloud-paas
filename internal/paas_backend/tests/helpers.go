@@ -63,3 +63,11 @@ func fromJson(body io.Reader, v interface{}) {
 		panic(err)
 	}
 }
+
+func toString(body io.Reader) string {
+	buf := new(bytes.Buffer)
+	if _, err := buf.ReadFrom(body); err != nil {
+		panic(err)
+	}
+	return buf.String()
+}

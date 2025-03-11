@@ -1,4 +1,16 @@
 services:
+  app:
+    profiles: [app]
+    image: cloud-paas:latest
+    ports:
+      - 8080:8080
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - DB_URL=host=db user=paas password=paas dbname=paas
+
   db:
     image: postgres:latest
     environment:

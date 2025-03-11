@@ -26,16 +26,18 @@ func connectToDB() (*gorm.DB, error) {
 	}
 	logrus.Debug("Connected to database !")
 
-	models := []interface{}{models.DBApplication{}, models.DBEnvironment{}}
+	return db, nil
+}
 
+func MigrateModels(db *gorm.DB) error {
 	logrus.Debug("Running database migrations..")
+	models := []interface{}{models.DBApplication{}, models.DBEnvironment{}}
 	for _, model := range models {
-		if db.AutoMigrate(model) != nil {
-			return nil, fmt.Errorf("failed to run database migrations for model %v: %w", model, err)
+		if err := db.AutoMigrate(model); err != nil {
+			return fmt.Errorf("failed to run database migrations for model %v: %w", model, err)
 		}
 	}
-
-	return db, nil
+	return nil
 }
 
 func setupLogging() {
@@ -80,6 +82,9 @@ func Entrypoint() {
 	db, err := connectToDB()
 	if err != nil {
 		logrus.Fatalf("Failed to connect to database: %v", err)
+	}
+	if err := MigrateModels(db); err != nil {
+		logrus.Fatalf("Failed to run database migrations: %v", err)
 	}
 
 	// Setup state (note: we assign to the global variable here)

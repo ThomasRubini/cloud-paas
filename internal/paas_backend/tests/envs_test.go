@@ -24,7 +24,7 @@ func TestGetNoEnvs(t *testing.T) {
 	assert.Equal(t, 0, len(envs))
 }
 
-func TestGetEnv(t *testing.T) {
+func TestCreateAndGetEnv(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	newApp := comm.CreateAppRequest{

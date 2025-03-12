@@ -60,7 +60,6 @@ func TestCreateExistingEnv(t *testing.T) {
 	makeOKRequest(t, webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
 
 	w := makeRequest(webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
-	fmt.Println(toString(w.Body))
 	assert.Equal(t, 409, w.Code)
 }
 

@@ -104,8 +104,18 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 	state := c.MustGet("state").(utils.State)
 	appId := c.Param("app_id")
 	if appId == "" {
-		c.JSON(400, gin.H{"error": "missing id"})
+		c.JSON(400, gin.H{"error": "missing app id"})
 		return nil, nil
+	}
+
+	app := models.DBApplication{}
+	if err := state.Db.First(&app, constructAppFromId(appId)).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "application not found"})
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
 
 	envName := c.Param("env_name")
@@ -115,7 +125,7 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 	}
 
 	var env models.DBEnvironment
-	if err := state.Db.Where("application_id = ? AND name = ?", appId, envName).First(&env).Error; err != nil {
+	if err := state.Db.Where("application_id = ? AND name = ?", app.ID, envName).First(&env).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		} else {

@@ -98,7 +98,12 @@ func Entrypoint() {
 	g := SetupWebServer(state)
 
 	// init crontab for fetching repos
-	repofetch.Init(config.Get().REPO_FETCH_PERIOD_SECS)
+	if config.Get().REPO_FETCH_ENABLE {
+		logrus.Info("Starting repository fetch crontab")
+		repofetch.Init(config.Get().REPO_FETCH_PERIOD_SECS)
+	} else {
+		logrus.Info("Repository fetch crontab disabled")
+	}
 
 	// Launch web server. Function will never return
 	launchWebServer(g)

@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	VERBOSE                bool   `env:"VERBOSE" envDefault:"false"`
+	REPO_FETCH_ENABLE      bool   `env:"REPO_FETCH_ENABLE" envDefault:"true"`
 	REPO_FETCH_PERIOD_SECS int    `env:"REPO_FETCH_PERIOD_SECS"`
 	REPO_DIR               string `env:"REPO_DIR"`
 	DB_URL                 string `env:"DB_URL"`

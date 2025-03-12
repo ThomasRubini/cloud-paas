@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,8 +49,9 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 			},
 		},
 		Values: map[string]interface{}{
-			"namespace":    options.Namespace,
-			"replicaCount": 1,
+			"deploymentName": getDeploymentName(env),
+			"namespace":      options.Namespace,
+			"replicaCount":   1,
 			"image": map[string]interface{}{
 				"repository": imageRepo,
 				"tag":        imageTag,
@@ -57,6 +59,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 			"service": map[string]interface{}{
 				"port": options.ExposedPort,
 			},
+			"containerPort": options.ExposedPort,
 		},
 	}
 
@@ -66,7 +69,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Options) (*release.Release, error) {
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", nil); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", log.Printf); err != nil {
 		return nil, err
 	}
 

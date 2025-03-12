@@ -32,6 +32,7 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 
 	// TODO
 	env := project.Envs[0]
+	env.Application = project
 
 	err = logic.HandleEnvironmentUpdate(env)
 	if err != nil {

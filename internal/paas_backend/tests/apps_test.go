@@ -131,7 +131,7 @@ func TestRecreateApp(t *testing.T) {
 
 	// Insert app again
 	w := makeRequest(webServer, "POST", "/api/v1/applications", toJson(appCreateQuest))
-	assert.Equal(t, 409, w.Code)
+	assertStatusCode(t, w, 409)
 }
 
 func TestDeleteApp(t *testing.T) {
@@ -166,7 +166,7 @@ func TestDeleteNonexistentApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	w := makeRequest(webServer, "DELETE", "/api/v1/applications/1", nil)
-	assert.Equal(t, 404, w.Code)
+	assertStatusCode(t, w, 404)
 }
 
 func TestGetAppByID(t *testing.T) {
@@ -217,7 +217,7 @@ func TestGetNonExistingApp(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
 	w := makeRequest(webServer, "GET", "/api/v1/applications/1", nil)
-	assert.Equal(t, 404, w.Code)
+	assertStatusCode(t, w, 404)
 }
 
 func TestUpdateApp(t *testing.T) {

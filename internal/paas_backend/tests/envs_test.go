@@ -60,7 +60,7 @@ func TestCreateExistingEnv(t *testing.T) {
 	makeOKRequest(t, webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
 
 	w := makeRequest(webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
-	assert.Equal(t, 409, w.Code)
+	assertStatusCode(t, w, 409)
 }
 
 func TestDeleteEnv(t *testing.T) {
@@ -103,5 +103,5 @@ func TestDeleteNonExistingEnv(t *testing.T) {
 
 	// Delete
 	w := makeRequest(webServer, "DELETE", fmt.Sprintf("/api/v1/applications/%v/environments/nonexisting", newApp.Name), nil)
-	assert.Equal(t, 404, w.Code)
+	assertStatusCode(t, w, 404)
 }

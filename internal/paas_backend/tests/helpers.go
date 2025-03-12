@@ -43,8 +43,7 @@ func makeRequest(webServer *gin.Engine, method string, path string, body io.Read
 func makeOKRequest(t *testing.T, webServer *gin.Engine, method string, path string, body io.Reader) *httptest.ResponseRecorder {
 	w := makeRequest(webServer, method, path, body)
 	if w.Code != 200 {
-		fmt.Println("Request failed !")
-		fmt.Println("Body:")
+		fmt.Println("Request failed ! (expected 200, got", w.Code, "). Body:")
 		fmt.Println(w.Body)
 		assert.Equal(t, 200, w.Code)
 	}
@@ -74,4 +73,12 @@ func toString(body io.Reader) string {
 		panic(err)
 	}
 	return buf.String()
+}
+
+func assertStatusCode(t *testing.T, w *httptest.ResponseRecorder, expected int) {
+	if w.Code != expected {
+		fmt.Printf("Request failed ! (expected %v, got %v). Body:", expected, w.Code)
+		fmt.Println(w.Body)
+		assert.Equal(t, expected, w.Code)
+	}
 }

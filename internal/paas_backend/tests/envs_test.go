@@ -63,6 +63,16 @@ func TestCreateExistingEnv(t *testing.T) {
 	assertStatusCode(t, w, 409)
 }
 
+func TestCreateEnvAtNonExistingApp(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	newEnv := comm.CreateEnvRequest{
+		Name: "prod",
+	}
+	w := makeRequest(webServer, "POST", "/api/v1/applications/nonexisting/environments", toJson(newEnv))
+	assertStatusCode(t, w, 404)
+}
+
 func TestDeleteEnv(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 

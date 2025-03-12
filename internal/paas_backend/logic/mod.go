@@ -24,7 +24,11 @@ func HandleEnvironmentUpdate(env models.DBEnvironment) error {
 	port := imgbuild.GetExposedPort(imageTag)
 
 	// Redeploy using the new image
-	err = deploy.DeployApp(env, imageTag, env.Application.Name, *port)
+	err = deploy.DeployApp(env, deploy.Options{
+		ImageTag:    imageTag,
+		ExposedPort: *port,
+		Namespace:   env.Application.Name,
+	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %v", err)
 	}

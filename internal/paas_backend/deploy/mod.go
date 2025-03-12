@@ -22,18 +22,22 @@ func splitImage(image string) (string, string) {
 	return split[0], split[1]
 }
 
-func generateChart(env models.DBEnvironment, appImage string, appPort int) (*chart.Chart, error) {
+func getDeploymentName(env models.DBEnvironment) string {
+	return fmt.Sprintf("%v-%v", env.Application.Name, env.Name)
+}
+
+func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, error) {
 	deploymentPath := filepath.Join("dist", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
 	if err != nil {
 		return nil, err
 	}
 
-	imageRepo, imageTag := splitImage(appImage)
+	imageRepo, imageTag := splitImage(options.ImageTag)
 
 	myChart := &chart.Chart{
 		Metadata: &chart.Metadata{
-			Name:       env.Application.Name,
+			Name:       getDeploymentName(env),
 			APIVersion: "v2",
 			Version:    "0.1.0",
 		},
@@ -44,13 +48,14 @@ func generateChart(env models.DBEnvironment, appImage string, appPort int) (*cha
 			},
 		},
 		Values: map[string]interface{}{
+			"namespace":    options.Namespace,
 			"replicaCount": 1,
 			"image": map[string]interface{}{
 				"repository": imageRepo,
 				"tag":        imageTag,
 			},
 			"service": map[string]interface{}{
-				"port": appPort,
+				"port": options.ExposedPort,
 			},
 		},
 	}
@@ -58,16 +63,16 @@ func generateChart(env models.DBEnvironment, appImage string, appPort int) (*cha
 	return myChart, nil
 }
 
-func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, namespace string) (*release.Release, error) {
+func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Options) (*release.Release, error) {
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, "memory", nil); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", nil); err != nil {
 		return nil, err
 	}
 
 	install := action.NewInstall(actionConfig)
 	install.ReleaseName = env.Application.Name
-	install.Namespace = namespace
+	install.Namespace = options.Namespace
 	install.Wait = true
 	install.Atomic = true
 
@@ -81,15 +86,22 @@ Inputs:
   - Image
   - TCP Port exposed inside the image
 */
-func DeployApp(env models.DBEnvironment, imageTag string, namespace string, exposedPort int) error {
+
+type Options struct {
+	Namespace   string
+	ImageTag    string
+	ExposedPort int
+}
+
+func DeployApp(env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Deploying app %v:%v", env.Application.Name, env.Name)
 
-	myChart, err := generateChart(env, imageTag, exposedPort)
+	myChart, err := generateChart(env, options)
 	if err != nil {
 		return fmt.Errorf("error generating chart: %v", err)
 	}
 
-	_, err = installHelmChart(myChart, env, namespace)
+	_, err = installHelmChart(myChart, env, options)
 	if err != nil {
 		return fmt.Errorf("error installing chart: %v", err)
 	}

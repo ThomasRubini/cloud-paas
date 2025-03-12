@@ -41,7 +41,7 @@ func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func fetchRepoChanges(state utils.State, project models.DBApplication, dir string) error {
+func pullRepoChanges(state utils.State, project models.DBApplication, dir string) error {
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
@@ -79,7 +79,7 @@ func pullRepository(state utils.State, project models.DBApplication) error {
 		}
 	}
 
-	err := fetchRepoChanges(state, project, dir)
+	err := pullRepoChanges(state, project, dir)
 	if err != nil {
 		return err
 	}

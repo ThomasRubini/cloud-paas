@@ -21,6 +21,10 @@ func isDir(path string) bool {
 
 // called on every repository on a schedule to pull them and update them
 func handleRepository(state utils.State, project models.DBApplication) error {
+	if project.SourceURL == "" {
+		logrus.Debug("Skipping project with empty source URL")
+	}
+
 	err := pullRepository(state, project)
 	if err != nil {
 		return fmt.Errorf("error pulling repository: %v", err)

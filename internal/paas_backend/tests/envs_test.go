@@ -17,7 +17,7 @@ func TestGetNoEnvs(t *testing.T) {
 	}
 	makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(newApp))
 
-	w := makeOKRequest(t, webServer, "GET", fmt.Sprintf("/api/v1/applications/%v/environments/", newApp.Name), nil)
+	w := makeOKRequest(t, webServer, "GET", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), nil)
 
 	var envs = fromJson[[]comm.EnvView](w.Body)
 	assert.Equal(t, 0, len(envs))

@@ -20,8 +20,8 @@ func parseUInt(s string) uint {
 
 func initEnvironments(g *gin.RouterGroup) {
 	appRouter := g.Group("/applications/:app_id/environments")
-	appRouter.GET("/", getEnvs)
-	appRouter.POST("/", createEnv)
+	appRouter.GET("", getEnvs)
+	appRouter.POST("", createEnv)
 	appRouter.DELETE("/:env_name", deleteEnv)
 	appRouter.PATCH("/:env_name", updateEnv)
 }

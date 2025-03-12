@@ -13,6 +13,7 @@ type DBApplication struct {
 	Desc       string
 	SourceURL  string
 	AutoDeploy bool
+	Envs       []DBEnvironment `gorm:"foreignKey:ApplicationID"`
 }
 
 func (p DBApplication) GetPath() string {

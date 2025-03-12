@@ -12,7 +12,7 @@ type DBApplication struct {
 	Name       string `gorm:"unique;not null;default:null"`
 	Desc       string
 	SourceURL  string
-	AutoDeploy bool
+	AutoDeploy bool            // TODO move to environment
 	Envs       []DBEnvironment `gorm:"foreignKey:ApplicationID"`
 }
 

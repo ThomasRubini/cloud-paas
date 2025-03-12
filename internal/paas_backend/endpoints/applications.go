@@ -6,6 +6,7 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -19,6 +20,7 @@ func initApplications(g *gin.RouterGroup) {
 	g.POST("/applications", createApp)
 	g.DELETE("/applications/:app_id", deleteApp)
 	g.PATCH("/applications/:app_id", updateApp)
+	g.PATCH("/applications/:app_id/redeploy", redeployApp)
 }
 
 // Construct an app, guessing if it's "ID" is its databsae ID or its app name
@@ -202,4 +204,36 @@ func updateApp(c *gin.Context) {
 	}
 
 	c.Status(200)
+}
+
+// RedeployApplication godoc
+// @Summary      Redeploy an application (all environments)
+// @Tags         applications
+// @Param        app_id path string true "Application ID"
+// @Success      200
+// @Router       /api/v1/applications/{app_id}/redeploy [patch]
+func redeployApp(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
+	appId := c.Param("app_id")
+	if appId == "" {
+		c.JSON(400, gin.H{"error": "missing id"})
+		return
+	}
+	appConstraints := constructAppFromId(appId)
+
+	var app models.DBApplication
+	if err := state.Db.Preload("Envs").First(&app, appConstraints).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"error": "application not found"})
+		} else {
+			c.JSON(500, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	err := repofetch.HandleRepository(state, app)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 }

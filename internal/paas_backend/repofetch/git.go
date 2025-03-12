@@ -19,6 +19,10 @@ func getAuth(state utils.State, project models.DBApplication) (transport.AuthMet
 		return nil, fmt.Errorf("error getting source credentials: %v", err)
 	}
 
+	if username == "" && password == "" {
+		return nil, nil
+	}
+
 	return &http.BasicAuth{
 		Username: username,
 		Password: password,

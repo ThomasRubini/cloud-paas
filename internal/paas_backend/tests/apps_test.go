@@ -13,8 +13,7 @@ import (
 func TestGetNoApps(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
-	w := makeRequest(webServer, "GET", "/api/v1/applications", nil)
-	assert.Equal(t, 200, w.Code)
+	w := makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
 	var apps = fromJson[[]comm.AppView](w.Body)
 	assert.Equal(t, 0, len(apps))

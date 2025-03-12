@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/cli"
@@ -81,6 +82,7 @@ Inputs:
   - TCP Port exposed inside the image
 */
 func DeployApp(env models.DBEnvironment, imageTag string, namespace string, exposedPort int) error {
+	logrus.Debugf("Deploying app %v:%v", env.Application.Name, env.Name)
 
 	myChart, err := generateChart(env, imageTag, exposedPort)
 	if err != nil {
@@ -92,5 +94,6 @@ func DeployApp(env models.DBEnvironment, imageTag string, namespace string, expo
 		return fmt.Errorf("error installing chart: %v", err)
 	}
 
+	logrus.Debugf("Deployed app %v:%v successfully", env.Application.Name, env.Name)
 	return nil
 }

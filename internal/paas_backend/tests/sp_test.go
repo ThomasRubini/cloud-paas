@@ -29,3 +29,13 @@ func TestSetAndGetSecrets(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "value2", value)
 }
+
+func TestSetSecretTwice(t *testing.T) {
+	state := fakeState(t)
+
+	err := state.SecretsProvider.SetSecret("key1", "value1")
+	assert.Nil(t, err)
+
+	err = state.SecretsProvider.SetSecret("key1", "value2")
+	assert.Nil(t, err)
+}

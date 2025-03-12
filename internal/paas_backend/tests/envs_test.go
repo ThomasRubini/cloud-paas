@@ -75,3 +75,17 @@ func TestDeleteEnv(t *testing.T) {
 	envs = fromJson[[]comm.EnvView](w.Body)
 	assert.Equal(t, 0, len(envs))
 }
+
+func TestDeleteNonExistingEnv(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	newApp := comm.CreateAppRequest{
+		Name: "test1",
+	}
+	// Add app
+	makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(newApp))
+
+	// Delete
+	w := makeRequest(webServer, "DELETE", fmt.Sprintf("/api/v1/applications/%v/environments/nonexisting", newApp.Name), nil)
+	assert.Equal(t, 404, w.Code)
+}

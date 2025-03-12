@@ -82,14 +82,6 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	return install.Run(myChart, myChart.Values)
 }
 
-/*
-Inputs:
-- Deployement (in the cloud-pass sense, not the kubernetes sense)
-  - Name
-  - Image
-  - TCP Port exposed inside the image
-*/
-
 type Options struct {
 	Namespace   string
 	ImageTag    string

@@ -6,4 +6,6 @@ type DBEnvironment struct {
 	Application   DBApplication `gorm:"foreignKey:ApplicationID"`
 	Domain        string
 	Name          string `gorm:"uniqueIndex:idx_env_name;not null;default:null"`
+	Branch        string
+	Running       bool
 }

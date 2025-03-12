@@ -11,7 +11,7 @@ import (
 )
 
 func TestGetNoApps(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	w := makeOKRequest(t, webServer, "GET", "/api/v1/applications", nil)
 
@@ -20,7 +20,7 @@ func TestGetNoApps(t *testing.T) {
 }
 
 func TestOneSimpleApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name:       "test",
@@ -43,7 +43,7 @@ func TestOneSimpleApp(t *testing.T) {
 }
 
 func TestOneComplexApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name:           "test",
@@ -70,7 +70,7 @@ func TestOneComplexApp(t *testing.T) {
 }
 
 func TestMultipleApps(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	createRequests := []comm.CreateAppRequest{
 		{
@@ -118,7 +118,7 @@ func TestMultipleApps(t *testing.T) {
 }
 
 func TestRecreateApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name: "test",
@@ -135,7 +135,7 @@ func TestRecreateApp(t *testing.T) {
 }
 
 func TestDeleteApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name: "test",
@@ -163,14 +163,14 @@ func TestDeleteApp(t *testing.T) {
 }
 
 func TestDeleteNonexistentApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	w := makeRequest(webServer, "DELETE", "/api/v1/applications/1", nil)
 	assertStatusCode(t, w, 404)
 }
 
 func TestGetAppByID(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name: "test",
@@ -192,7 +192,7 @@ func TestGetAppByID(t *testing.T) {
 }
 
 func TestGetAppByName(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name: "test",
@@ -214,14 +214,14 @@ func TestGetAppByName(t *testing.T) {
 }
 
 func TestGetNonExistingApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	w := makeRequest(webServer, "GET", "/api/v1/applications/1", nil)
 	assertStatusCode(t, w, 404)
 }
 
 func TestUpdateApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	appCreateQuest := comm.CreateAppRequest{
 		Name: "test",

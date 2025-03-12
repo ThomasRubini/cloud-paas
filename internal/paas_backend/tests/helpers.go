@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
@@ -17,7 +19,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func fakeState() utils.State {
+func fakeState(t *testing.T) utils.State {
 	gorm_db, err := gorm.Open(sqlite.Open(":memory:"))
 	if err != nil {
 		panic(err)
@@ -27,9 +29,17 @@ func fakeState() utils.State {
 		panic(err)
 	}
 
+	tmpDir, err := os.MkdirTemp("", "test")
+	if err != nil {
+		panic(err)
+	}
+	t.Cleanup(func() {
+		os.RemoveAll(tmpDir)
+	})
+
 	return utils.State{
 		Db:              gorm_db,
-		SecretsProvider: secretsprovider.Helper{Core: secretsprovider.FromFile("/tmp/secrets.json")},
+		SecretsProvider: secretsprovider.Helper{Core: secretsprovider.FromFile(filepath.Join(tmpDir, "/secrets.json"))},
 	}
 }
 

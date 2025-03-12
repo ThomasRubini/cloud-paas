@@ -11,7 +11,7 @@ import (
 )
 
 func TestGetNoEnvs(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newApp := comm.CreateAppRequest{
 		Name: "test1",
@@ -25,7 +25,7 @@ func TestGetNoEnvs(t *testing.T) {
 }
 
 func TestCreateAndGetEnv(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newApp := comm.CreateAppRequest{
 		Name: "test1",
@@ -47,7 +47,7 @@ func TestCreateAndGetEnv(t *testing.T) {
 }
 
 func TestCreateExistingEnv(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newApp := comm.CreateAppRequest{
 		Name: "test1",
@@ -64,7 +64,7 @@ func TestCreateExistingEnv(t *testing.T) {
 }
 
 func TestCreateEnvAtNonExistingApp(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newEnv := comm.CreateEnvRequest{
 		Name: "prod",
@@ -74,7 +74,7 @@ func TestCreateEnvAtNonExistingApp(t *testing.T) {
 }
 
 func TestDeleteEnv(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newApp := comm.CreateAppRequest{
 		Name: "test1",
@@ -103,7 +103,7 @@ func TestDeleteEnv(t *testing.T) {
 }
 
 func TestDeleteNonExistingEnv(t *testing.T) {
-	webServer := paas_backend.SetupWebServer(fakeState())
+	webServer := paas_backend.SetupWebServer(fakeState(t))
 
 	newApp := comm.CreateAppRequest{
 		Name: "test1",

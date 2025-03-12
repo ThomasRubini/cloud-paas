@@ -46,6 +46,24 @@ func TestCreateAndGetEnv(t *testing.T) {
 	assert.Equal(t, []comm.EnvView{finalEnv}, envs)
 }
 
+func TestCreateExistingEnv(t *testing.T) {
+	webServer := paas_backend.SetupWebServer(fakeState())
+
+	newApp := comm.CreateAppRequest{
+		Name: "test1",
+	}
+	makeOKRequest(t, webServer, "POST", "/api/v1/applications", toJson(newApp))
+
+	newEnv := comm.CreateEnvRequest{
+		Name: "prod",
+	}
+	makeOKRequest(t, webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
+
+	w := makeRequest(webServer, "POST", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), toJson(newEnv))
+	fmt.Println(toString(w.Body))
+	assert.Equal(t, 409, w.Code)
+}
+
 func TestDeleteEnv(t *testing.T) {
 	webServer := paas_backend.SetupWebServer(fakeState())
 
@@ -65,7 +83,6 @@ func TestDeleteEnv(t *testing.T) {
 	w := makeOKRequest(t, webServer, "GET", fmt.Sprintf("/api/v1/applications/%v/environments", newApp.Name), nil)
 	envs := fromJson[[]comm.EnvView](w.Body)
 	assert.Equal(t, 1, len(envs))
-	fmt.Printf("%v\n", envs)
 
 	// Delete
 	makeOKRequest(t, webServer, "DELETE", fmt.Sprintf("/api/v1/applications/%v/environments/%v", newApp.Name, newEnv.Name), nil)

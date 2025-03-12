@@ -98,6 +98,17 @@ func createEnv(c *gin.Context) {
 		return
 	}
 
+	// Verify app does not already exist
+	var count int64
+	if err := state.Db.Model(&models.DBEnvironment{}).Where("application_id = ? and name = ?", app.ID, request.Name).Count(&count).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if count > 0 {
+		c.JSON(409, gin.H{"error": "application already exists"})
+		return
+	}
+
 	var newEnv models.DBEnvironment
 	newEnv.ApplicationID = app.ID
 	utils.CopyFields(&request, &newEnv)
@@ -119,7 +130,6 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 
 	envName := c.Param("env_name")
 	if envName == "" {
-		c.JSON(400, gin.H{"error": "missing environment name"})
 		return nil, nil
 	}
 

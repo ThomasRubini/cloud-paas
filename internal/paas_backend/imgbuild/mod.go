@@ -58,6 +58,7 @@ func Build(buildContextPath string, tag string) error {
 		}
 	}
 
+	logrus.Debugf("Built image at %s successfully", buildContextPath)
 	return nil
 }
 

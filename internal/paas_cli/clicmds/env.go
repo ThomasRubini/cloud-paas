@@ -140,5 +140,7 @@ func deleteEnvAction(ctx context.Context, cmd *cli.Command) error {
 	if resp.StatusCode() != 200 {
 		return fmt.Errorf("failed to delete env: %s", resp.String())
 	}
+
+	fmt.Println("Environment deleted successfully")
 	return nil
 }

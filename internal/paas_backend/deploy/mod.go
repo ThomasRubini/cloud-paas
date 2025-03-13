@@ -70,7 +70,7 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", log.Printf); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error initializing config: %v", err)
 	}
 
 	install := action.NewInstall(actionConfig)
@@ -80,7 +80,12 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	install.Atomic = true
 	install.CreateNamespace = true
 
-	return install.Run(myChart, myChart.Values)
+	resp, err := install.Run(myChart, myChart.Values)
+	if err != nil {
+		return nil, fmt.Errorf("error running install: %v", err)
+	}
+
+	return resp, nil
 }
 
 type Options struct {

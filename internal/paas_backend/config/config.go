@@ -21,6 +21,10 @@ type Config struct {
 	OIDC_USER_PASSWORD     string `env:"OIDC_USER_PASSWORD"`
 	OIDC_REALM             string `env:"OIDC_REALM"`
 
+	REGISTRY_REPO_URI string `env:"REGISTRY_REPO_URI"`
+	REGISTRY_USER     string `env:"REGISTRY_USER"`
+	REGISTRY_PASSWORD string `env:"REGISTRY_PASSWORD"`
+
 	SECRETS_IMPL      string `env:"SECRETS_IMPL"`
 	SECRETS_IMPL_FILE string `env:"SECRETS_IMPL_FILE" envDefault:""`
 }

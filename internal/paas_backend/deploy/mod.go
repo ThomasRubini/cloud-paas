@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/sirupsen/logrus"
@@ -79,6 +80,7 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	install.Wait = true
 	install.Atomic = true
 	install.CreateNamespace = true
+	install.Timeout = 30 * time.Second
 
 	resp, err := install.Run(myChart, myChart.Values)
 	if err != nil {

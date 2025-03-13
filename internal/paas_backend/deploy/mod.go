@@ -78,6 +78,7 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	install.Namespace = options.Namespace
 	install.Wait = true
 	install.Atomic = true
+	install.CreateNamespace = true
 
 	return install.Run(myChart, myChart.Values)
 }

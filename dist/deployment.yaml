@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: '{{ .Values.deploymentName }}'
-          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          image: '{{ .Values.image }}'
           ports:
             - containerPort: {{ .Values.containerPort }}

@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
@@ -15,14 +14,6 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 )
-
-func splitImage(image string) (string, string) {
-	split := strings.Split(image, ":")
-	if len(split) == 1 {
-		return split[0], "latest"
-	}
-	return split[0], split[1]
-}
 
 func getDeploymentName(env models.DBEnvironment) string {
 	return fmt.Sprintf("%v-%v", env.Application.Name, env.Name)
@@ -34,8 +25,6 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 	if err != nil {
 		return nil, err
 	}
-
-	imageRepo, imageTag := splitImage(options.ImageTag)
 
 	myChart := &chart.Chart{
 		Metadata: &chart.Metadata{
@@ -53,14 +42,8 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 			"deploymentName": getDeploymentName(env),
 			"namespace":      options.Namespace,
 			"replicaCount":   1,
-			"image": map[string]interface{}{
-				"repository": imageRepo,
-				"tag":        imageTag,
-			},
-			"service": map[string]interface{}{
-				"port": options.ExposedPort,
-			},
-			"containerPort": options.ExposedPort,
+			"image":          options.ImageTag,
+			"containerPort":  options.ExposedPort,
 		},
 	}
 

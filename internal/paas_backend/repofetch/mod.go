@@ -8,6 +8,8 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,16 +27,31 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 		logrus.Debug("Skipping project with empty source URL")
 	}
 
-	err := pullRepository(state, project)
+	commits := getAllEnvBranchesLastCommit(project)
+
+	err := fetchRepository(state, project)
 	if err != nil {
-		return fmt.Errorf("error pulling repository: %v", err)
+		return fmt.Errorf("error fetching repository: %v", err)
 	}
 
-	// TODO
-	env := project.Envs[0]
-	env.Application = project
+	new_commits := getAllEnvBranchesLastCommit(project)
 
-	err = logic.HandleEnvironmentUpdate(env)
+	for _, env := range project.Envs {
+		if commits[env.Branch] != new_commits[env.Branch] {
+			err := logic.HandleEnvironmentUpdate(env)
+			if err != nil {
+				return fmt.Errorf("error handling repository update: %v", err)
+			}
+		}
+	}
+
+	for _, env := range project.Envs {
+		err = logic.HandleEnvironmentUpdate(env)
+		if err != nil {
+			return fmt.Errorf("error pulling environment: %v", err)
+		}
+	}
+
 	if err != nil {
 		return fmt.Errorf("error handling repository update: %v", err)
 	}
@@ -63,6 +80,29 @@ func handleRepositories() error {
 	}
 
 	return nil
+}
+
+func getAllEnvBranchesLastCommit(project models.DBApplication) map[string]string {
+	dir := project.GetPath()
+	repo, err := git.PlainOpen(dir)
+	if err != nil {
+		logrus.Errorf("Error opening repository for project %v : %v", project, err)
+	}
+	branches, err := repo.Branches()
+	if err != nil {
+		logrus.Errorf("Error getting all branches for project %v : %v", project, err)
+	}
+	branchesLastCommit := make(map[string]string)
+	//TODO : Optimize this shit
+	for _, env := range project.Envs {
+		branches.ForEach(func(branch *plumbing.Reference) error {
+			if branch.Name().String() == env.Branch {
+				branchesLastCommit[env.Name] = branch.Hash().String()
+			}
+			return nil
+		})
+	}
+	return branchesLastCommit
 }
 
 func Init(period int) {

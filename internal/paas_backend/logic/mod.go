@@ -18,7 +18,8 @@ func HandleEnvironmentUpdate(env models.DBEnvironment) error {
 	project := env.Application
 
 	imageTag := fmt.Sprintf("%s/%s:%s", config.Get().REGISTRY_REPO_URI, project.Name, env.Name)
-	err := imgbuild.Build(project.GetPath(), imageTag)
+	// should we add a property for "directory" in the environment or do we add the name of the env at the end of the path, assuming the last path part is the name of the env ?
+	err := imgbuild.Build(fmt.Sprintf("%s/%s", project.GetPath(), env.Name), imageTag) // dangerous i think idk help
 	if err != nil {
 		return fmt.Errorf("error building image: %v", err)
 	}

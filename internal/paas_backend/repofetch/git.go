@@ -8,6 +8,7 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/go-git/go-git/v5"
 	gitconfig "github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/sirupsen/logrus"
@@ -45,7 +46,8 @@ func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func pullRepoChanges(state utils.State, project models.DBApplication, dir string) error {
+func pullEnvChanges(state utils.State, env models.DBEnvironment, dir string) error {
+	project := env.Application
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
@@ -62,8 +64,9 @@ func pullRepoChanges(state utils.State, project models.DBApplication, dir string
 	}
 
 	err = w.Pull(&git.PullOptions{
-		RemoteName: "origin",
-		Auth:       auth,
+		RemoteName:    "origin",
+		Auth:          auth,
+		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", env.Name)),
 	})
 	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return fmt.Errorf("error fetching repository: %v", err)
@@ -71,10 +74,33 @@ func pullRepoChanges(state utils.State, project models.DBApplication, dir string
 	return nil
 }
 
-func pullRepository(state utils.State, project models.DBApplication) error {
+func fetchRepoChanges(state utils.State, project models.DBApplication, dir string) error {
+	repo, err := git.PlainOpen(dir)
+	if err != nil {
+		return fmt.Errorf("error opening repository: %v", err)
+	}
+
+	auth, err := getAuth(state, project)
+	if err != nil {
+		return fmt.Errorf("error getting auth: %v", err)
+	}
+
+	err = repo.Fetch(&git.FetchOptions{
+		RemoteName: "origin",
+		Auth:       auth,
+	})
+
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return fmt.Errorf("error fetching repository: %v", err)
+	}
+	return nil
+}
+
+func pullEnvBranch(state utils.State, env models.DBEnvironment) error {
+	project := env.Application
 	dir := project.GetPath()
 
-	logrus.Debugf("Pulling repository %v at %v", project.Name, dir)
+	logrus.Debugf("Pulling branch repository %v/%v at %v", project.Name, env.Name, dir)
 
 	if !isDir(dir) {
 		err := initRepoIfNotExists(project, dir)
@@ -83,7 +109,27 @@ func pullRepository(state utils.State, project models.DBApplication) error {
 		}
 	}
 
-	err := pullRepoChanges(state, project, dir)
+	err := pullEnvChanges(state, env, dir)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func fetchRepository(state utils.State, project models.DBApplication) error {
+	dir := project.GetPath()
+
+	logrus.Debugf("fetch repository %v at %v", project.Name, dir)
+
+	if !isDir(dir) {
+		err := initRepoIfNotExists(project, dir)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := fetchRepoChanges(state, project, dir)
 	if err != nil {
 		return err
 	}

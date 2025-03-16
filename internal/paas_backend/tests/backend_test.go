@@ -17,3 +17,12 @@ func TestHealth(t *testing.T) {
 	w = makeRequest(webServer, "GET", "/nonexistent", nil)
 	assert.Equal(t, 404, w.Code)
 }
+
+func TestFetchAndPullEnvs(t *testing.T) {
+	state := fakeState(t)
+	webServer := paas_backend.SetupWebServer(state)
+
+	// Test fetch and pull envs URL
+	w := makeOKRequest(t, webServer, "GET", "/fetch_and_pull_envs", nil)
+	assert.Equal(t, "OK", toString(w.Body))
+}

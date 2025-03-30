@@ -98,6 +98,6 @@ jobs:
       uses: actions/attest-build-provenance@v2
       if: ${{ steps.meta.outputs.tags != '' }}
       with:
-        subject-name: index.docker.io/my-docker-hub-namespace/my-docker-hub-repository
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         subject-digest: ${{ steps.push.outputs.digest }}
         push-to-registry: true

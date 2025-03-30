@@ -6,6 +6,7 @@ name: Go
 on:
   push:
     branches: [ "main", "ci" ]
+    tags: [ "*" ]
   pull_request:
     branches: [ "main" ]
 

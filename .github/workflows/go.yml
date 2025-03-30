@@ -6,31 +6,21 @@ name: Go
 on:
   push:
     branches: [ "main", "ci" ]
+    tags: [ "*" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-
   build:
+    name: Build and test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-
-    - name: Setup Golang caches
-      uses: actions/cache@v4
-      with:
-        key: go-${{ hashFiles('**/go.sum') }}
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.3'
-
-    - name: Build documentation
-      run: make backend_docs
     
     - name: Install pre-commit deps
       run: |
@@ -38,6 +28,9 @@ jobs:
     
     - name: Run pre-commit
       uses: pre-commit/action@v3.0.1
+
+    - name: Build documentation
+      run: make backend_docs
 
     - name: Build
       run: go build -v ./...
@@ -52,3 +45,62 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  build_docker:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      REGISTRY: ghcr.io
+      # github.repository as <account>/<repo>
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Log in to the Container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Needed to use gha caching
+    - name: Docker Setup Buildx
+      uses: docker/setup-buildx-action@v3
+      with: 
+        driver: docker-container
+        driver-opts: image=moby/buildkit:master,network=host
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=ref,event=tag
+
+    - name: Build Docker image and push on main
+      id: push
+      uses: docker/build-push-action@v6
+      with:
+        push: ${{ steps.meta.outputs.tags != '' }}
+        context: .
+        file: ./Dockerfile
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@v2
+      if: ${{ steps.meta.outputs.tags != '' }}
+      with:
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true

@@ -33,6 +33,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
+        - name: memory-limits
+          resources:
+            limits:
+              memory: "2Gi"
+            requests:
+              memory: "512Mi"
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:

@@ -14,6 +14,7 @@ type Config struct {
 	REPO_FETCH_PERIOD_SECS int    `env:"REPO_FETCH_PERIOD_SECS"`
 	REPO_DIR               string `env:"REPO_DIR"`
 	DB_URL                 string `env:"DB_URL"`
+	DB_PASSWORD            string `env:"DB_PASSWORD"`
 	OIDC_BASE_URL          string `env:"OIDC_BASE_URL"`
 	OIDC_CLIENT_ID         string `env:"OIDC_CLIENT_ID"`
 	OIDC_CLIENT_SECRET     string `env:"OIDC_CLIENT_SECRET"`

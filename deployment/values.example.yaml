@@ -1,0 +1,6 @@
+app:
+  postgres_password: "paas"
+
+postgresql:
+  auth:
+    password: paas

@@ -20,7 +20,7 @@ import (
 func connectToDB() (*gorm.DB, error) {
 	c := config.Get()
 	logrus.Debug("Connecting to database..")
-	db, err := gorm.Open(postgres.Open(c.DB_URL), &gorm.Config{TranslateError: true})
+	db, err := gorm.Open(postgres.Open(fmt.Sprintf("%s password=%s", c.DB_URL, c.DB_PASSWORD)), &gorm.Config{TranslateError: true})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to db: %v", err)
 	}

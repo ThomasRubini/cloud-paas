@@ -23,12 +23,15 @@ type AppView struct {
 }
 
 type EnvView struct {
-	ID     uint `json:"id"`
-	Domain string
-	Name   string
+	ID      uint `json:"id"`
+	Domain  string
+	Name    string
+	Branch  string
+	Running bool
 }
 
 type CreateEnvRequest struct {
 	Domain string
 	Name   string
+	Branch string
 }

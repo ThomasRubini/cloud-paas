@@ -69,7 +69,7 @@ func handleRepositories() error {
 	var projects []models.DBApplication
 	res := state.Db.Model(&models.DBApplication{}).Preload("Envs").Find(&projects)
 	if res.Error != nil {
-		return fmt.Errorf("error fetching project names: %v", res.Error)
+		return fmt.Errorf("error fetching project names: %w", res.Error)
 	}
 	logrus.Infof("Found %d projects to pull", len(projects))
 

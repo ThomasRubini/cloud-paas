@@ -2,6 +2,7 @@
 linters:
   enable:
     - stylecheck
+    - errorlint # ensure fmt.Errorf uses %w
 
 linters-settings:
   stylecheck:

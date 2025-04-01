@@ -20,12 +20,12 @@ func HandleEnvironmentUpdate(env models.DBEnvironment) error {
 	imageTag := fmt.Sprintf("%s/%s:%s", config.Get().REGISTRY_REPO_URI, project.Name, env.Name)
 	err := imgbuild.Build(project.GetPath(), imageTag)
 	if err != nil {
-		return fmt.Errorf("error building image: %v", err)
+		return fmt.Errorf("error building image: %w", err)
 	}
 
 	err = UploadToRegistry(imageTag)
 	if err != nil {
-		return fmt.Errorf("error uploading image to registry: %v", err)
+		return fmt.Errorf("error uploading image to registry: %w", err)
 	}
 
 	port := imgbuild.GetExposedPort(imageTag)
@@ -37,7 +37,7 @@ func HandleEnvironmentUpdate(env models.DBEnvironment) error {
 		Namespace:   env.Application.Name,
 	})
 	if err != nil {
-		return fmt.Errorf("error deploying app: %v", err)
+		return fmt.Errorf("error deploying app: %w", err)
 	}
 
 	return nil

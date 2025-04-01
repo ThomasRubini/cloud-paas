@@ -93,7 +93,7 @@ func createEnvAction(ctx context.Context, cmd *cli.Command) error {
 		"app_id": appName,
 	}).SetBody(&env).Post("/api/v1/applications/{app_id}/environments")
 	if err != nil {
-		return fmt.Errorf("failed to create env: %s", err)
+		return fmt.Errorf("failed to create env: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
@@ -110,7 +110,7 @@ func GetEnvListAction(ctx context.Context, cmd *cli.Command) error {
 		"app_id": appName,
 	}).Get("/api/v1/applications/{app_id}/environments")
 	if err != nil {
-		return fmt.Errorf("failed to get env list: %s", err)
+		return fmt.Errorf("failed to get env list: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
@@ -150,7 +150,7 @@ func deleteEnvAction(ctx context.Context, cmd *cli.Command) error {
 		"env_id": envName,
 	}).Delete("/api/v1/applications/{app_id}/environments/{env_id}")
 	if err != nil {
-		return fmt.Errorf("failed to delete env: %s", err)
+		return fmt.Errorf("failed to delete env: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {

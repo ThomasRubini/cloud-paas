@@ -45,15 +45,10 @@ func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func pullRepoChanges(state utils.State, project models.DBApplication, dir string) error {
+func fetchRepoChanges(state utils.State, project models.DBApplication, dir string) error {
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return fmt.Errorf("error opening repository: %v", err)
-	}
-
-	w, err := repo.Worktree()
-	if err != nil {
-		return fmt.Errorf("error getting worktree: %v", err)
 	}
 
 	auth, err := getAuth(state, project)
@@ -61,7 +56,7 @@ func pullRepoChanges(state utils.State, project models.DBApplication, dir string
 		return fmt.Errorf("error getting auth: %v", err)
 	}
 
-	err = w.Pull(&git.PullOptions{
+	err = repo.Fetch(&git.FetchOptions{
 		RemoteName: "origin",
 		Auth:       auth,
 	})
@@ -71,10 +66,9 @@ func pullRepoChanges(state utils.State, project models.DBApplication, dir string
 	return nil
 }
 
-func pullRepository(state utils.State, project models.DBApplication) error {
+func fetchRepository(state utils.State, project models.DBApplication) error {
+	logrus.Infof("Fetching repository for project %s", project.Name)
 	dir := project.GetPath()
-
-	logrus.Debugf("Pulling repository %v at %v", project.Name, dir)
 
 	if !isDir(dir) {
 		err := initRepoIfNotExists(project, dir)
@@ -83,10 +77,9 @@ func pullRepository(state utils.State, project models.DBApplication) error {
 		}
 	}
 
-	err := pullRepoChanges(state, project, dir)
+	err := fetchRepoChanges(state, project, dir)
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching repository: %v", err)
 	}
-
 	return nil
 }

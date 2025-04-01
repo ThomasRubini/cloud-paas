@@ -24,6 +24,24 @@ var appCreateCmd = &cli.Command{
 	Name:   "create",
 	Usage:  "Create an application",
 	Action: createAppAction,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "desc",
+			Usage: "Description of the application",
+		},
+		&cli.StringFlag{
+			Name:  "source-url",
+			Usage: "Source URL of the application",
+		},
+		&cli.StringFlag{
+			Name:  "source-username",
+			Usage: "Username of user on the repository source",
+		},
+		&cli.StringFlag{
+			Name:  "source-password",
+			Usage: "Password of user on the repository source. On Github, this can be a personal access token",
+		},
+	},
 }
 
 var appListCmd = &cli.Command{
@@ -51,8 +69,11 @@ func createAppAction(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	app := comm.CreateAppRequest{
-		Name: appName,
-		Desc: cmd.String("desc"),
+		Name:           appName,
+		Desc:           cmd.String("desc"),
+		SourceURL:      cmd.String("source-url"),
+		SourceUsername: cmd.String("source-username"),
+		SourcePassword: cmd.String("source-password"),
 	}
 
 	var parsedResp comm.IdResponse

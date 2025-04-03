@@ -1,6 +1,24 @@
-app:
-  postgres_password: "paas"
+registry:
+  registry_repo_uri: "harbor.phoenix.dopolytech.fr/library"
+  registry_user: "admin"
+  registry_password: "CHANGE_ME"
 
-postgresql:
-  auth:
-    password: paas
+postgres:
+  postgres_password: "CHANGE_ME"
+
+image:
+  tag: "latest" # Override the versionning of the chart
+
+env:
+  - name: OIDC_BASE_URL
+    value: "http://localhost:7079"
+  - name: OIDC_USER_ID
+    value: "paas-backend"
+  - name: OIDC_USER_PASSWORD
+    value: "paas-backend"
+  - name: OIDC_REALM
+    value: "master"
+  - name: OIDC_CLIENT_ID
+    value: "paas-backend"
+  - name: OIDC_CLIENT_SECRET
+    value: "paas-backend"

@@ -33,12 +33,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: memory-limits
+        - name: cloud-paas
           resources:
             limits:
-              memory: "2Gi"
+              memory: {{ .Values.resources.limits.memory }}
             requests:
-              memory: "512Mi"
+              memory: {{ .Values.resources.requests.memory }}
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
@@ -52,6 +52,7 @@ spec:
               protocol: TCP
           {{- if .Values.env }}
           env:
+          -  
             {{- toYaml .Values.env | nindent 12 }}
           {{- end }}
           {{- with .Values.livenessProbe }}

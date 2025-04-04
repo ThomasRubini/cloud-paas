@@ -12,13 +12,14 @@ import (
 var appName = ""
 
 var EnvCmd = &cli.Command{
-	Name:   "env",
-	Usage:  "Interact with users applications environments",
-	Action: EnvCmdAction,
+	Name:            "env",
+	Usage:           "Interact with users applications environments",
+	Action:          EnvCmdAction,
+	SkipFlagParsing: true,
 }
 
 var subEnvCmd = &cli.Command{
-	Name: "env",
+	Name: "<app_name>",
 	Commands: []*cli.Command{
 		envCreateCmd,
 		envListCmd,
@@ -32,6 +33,19 @@ var envCreateCmd = &cli.Command{
 	Name:   "create",
 	Usage:  "Create an environment for given application",
 	Action: createEnvAction,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "branch",
+			Usage:    "Branch to use for the environment",
+			Required: true,
+			Aliases:  []string{"b"},
+		},
+		&cli.StringFlag{
+			Name:    "domain",
+			Usage:   "Domain to use for the environment",
+			Aliases: []string{"d"},
+		},
+	},
 }
 
 var envListCmd = &cli.Command{
@@ -70,7 +84,9 @@ func createEnvAction(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	env := comm.CreateEnvRequest{
-		Name: envName,
+		Name:   envName,
+		Branch: cmd.String("branch"),
+		Domain: cmd.String("domain"),
 	}
 
 	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{

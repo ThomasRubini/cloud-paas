@@ -3,6 +3,7 @@ package repofetch
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
@@ -102,7 +103,7 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 	//TODO : Optimize this shit
 	for _, env := range project.Envs {
 		err = branches.ForEach(func(branch *plumbing.Reference) error {
-			if stripRemotePrefix(branch.Name().String()) == env.Branch {
+			if strings.TrimPrefix(branch.Name().String(), "refs/remotes/origin/") == env.Branch {
 				branchesLastCommit[env.Name] = branch.Hash().String()
 			}
 			return nil
@@ -123,13 +124,4 @@ func Init(period int) {
 
 		time.Sleep(time.Duration(period) * time.Second)
 	}()
-}
-
-// removes the 'refs/remotes/origin/' prefix from a reference name
-func stripRemotePrefix(refName string) string {
-	const prefix = "refs/remotes/origin/"
-	if refName[:len(prefix)] == prefix {
-		return refName[len(prefix):]
-	}
-	return refName
 }

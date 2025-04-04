@@ -54,7 +54,7 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
 	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", log.Printf); err != nil {
-		return nil, fmt.Errorf("error initializing config: %v", err)
+		return nil, fmt.Errorf("error initializing config: %w", err)
 	}
 
 	install := action.NewInstall(actionConfig)
@@ -67,7 +67,7 @@ func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Op
 
 	resp, err := install.Run(myChart, myChart.Values)
 	if err != nil {
-		return nil, fmt.Errorf("error running install: %v", err)
+		return nil, fmt.Errorf("error running install: %w", err)
 	}
 
 	return resp, nil
@@ -84,12 +84,12 @@ func DeployApp(env models.DBEnvironment, options Options) error {
 
 	myChart, err := generateChart(env, options)
 	if err != nil {
-		return fmt.Errorf("error generating chart: %v", err)
+		return fmt.Errorf("error generating chart: %w", err)
 	}
 
 	_, err = installHelmChart(myChart, env, options)
 	if err != nil {
-		return fmt.Errorf("error installing chart: %v", err)
+		return fmt.Errorf("error installing chart: %w", err)
 	}
 
 	logrus.Debugf("Deployed app %v:%v successfully", env.Application.Name, env.Name)

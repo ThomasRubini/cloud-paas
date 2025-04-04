@@ -38,7 +38,7 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 		}
 		err = fetchRepository(state, project)
 		if err != nil {
-			return fmt.Errorf("error fetching repository: %v", err)
+			return fmt.Errorf("error fetching repository: %w", err)
 		}
 
 		new_commits, err := getAllEnvBranchesLastCommit(project)
@@ -51,7 +51,7 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 				logrus.Info("New commit for env ", env.Name, " on branch ", env.Branch)
 				err := logic.HandleEnvironmentUpdate(env)
 				if err != nil {
-					return fmt.Errorf("error handling repository update: %v", err)
+					return fmt.Errorf("error handling repository update: %w", err)
 				}
 			}
 		}
@@ -69,7 +69,7 @@ func handleRepositories() error {
 	var projects []models.DBApplication
 	res := state.Db.Model(&models.DBApplication{}).Preload("Envs").Find(&projects)
 	if res.Error != nil {
-		return fmt.Errorf("error fetching project names: %v", res.Error)
+		return fmt.Errorf("error fetching project names: %w", res.Error)
 	}
 	logrus.Infof("Found %d projects to pull", len(projects))
 
@@ -87,7 +87,7 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 	dir := project.GetPath()
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
-		return nil, fmt.Errorf("error opening repository for project %v : %v", project, err)
+		return nil, fmt.Errorf("error opening repository for project %v : %w", project, err)
 	}
 	// Get the remote branches
 	refIter, err := repo.Storer.IterReferences()
@@ -109,7 +109,7 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 			return nil
 		})
 		if err != nil {
-			return nil, fmt.Errorf("error iterating branches for project %v: %v", project, err)
+			return nil, fmt.Errorf("error iterating branches for project %v: %w", project, err)
 		}
 	}
 	return branchesLastCommit, nil

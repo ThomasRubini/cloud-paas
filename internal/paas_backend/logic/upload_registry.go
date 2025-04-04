@@ -36,7 +36,7 @@ func UploadToRegistry(imageTag string) error {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
-		return fmt.Errorf("cli error - %s", err)
+		return fmt.Errorf("cli error - %w", err)
 	}
 
 	// Push the image to the registry
@@ -44,7 +44,7 @@ func UploadToRegistry(imageTag string) error {
 		RegistryAuth: getAuth(),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to push image - %s", err)
+		return fmt.Errorf("failed to push image - %w", err)
 	}
 	defer resp.Close()
 

@@ -38,12 +38,12 @@ func Build(buildContextPath string, tag string) error {
 
 	buildCtx, err := archive.TarWithOptions(buildContextPath, &archive.TarOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to tar build context - %s", err)
+		return fmt.Errorf("failed to tar build context - %w", err)
 	}
 
 	resp, err := cli.ImageBuild(ctx, buildCtx, buildOpts)
 	if err != nil {
-		return fmt.Errorf("failed to build image - %s", err)
+		return fmt.Errorf("failed to build image - %w", err)
 	}
 	defer resp.Body.Close()
 

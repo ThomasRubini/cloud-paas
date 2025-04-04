@@ -79,7 +79,7 @@ func createAppAction(ctx context.Context, cmd *cli.Command) error {
 	var parsedResp comm.IdResponse
 	resp, err := utils.GetAPIClient().R().SetBody(&app).SetResult(&parsedResp).Post("/api/v1/applications")
 	if err != nil {
-		return fmt.Errorf("failed to create app: %s", err)
+		return fmt.Errorf("failed to create app: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
@@ -94,7 +94,7 @@ func GetAppListAction(ctx context.Context, cmd *cli.Command) error {
 	var apps []comm.AppView
 	resp, err := utils.GetAPIClient().R().SetResult(&apps).Get("/api/v1/applications")
 	if err != nil {
-		return fmt.Errorf("failed to get app list: %s", err)
+		return fmt.Errorf("failed to get app list: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
@@ -118,7 +118,7 @@ func GetAppInfoAction(ctx context.Context, cmd *cli.Command) error {
 		"app_id": cmd.Args().First(),
 	}).SetResult(&app).Get("/api/v1/applications/{app_id}")
 	if err != nil {
-		return fmt.Errorf("failed to get app info: %s", err)
+		return fmt.Errorf("failed to get app info: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {
@@ -140,7 +140,7 @@ func deleteAppAction(ctx context.Context, cmd *cli.Command) error {
 		"app_id": cmd.Args().First(),
 	}).Delete("/api/v1/applications/{app_id}")
 	if err != nil {
-		return fmt.Errorf("failed to delete app: %s", err)
+		return fmt.Errorf("failed to delete app: %w", err)
 	}
 
 	if resp.StatusCode() != 200 {

@@ -79,7 +79,7 @@ func fetchRepository(state utils.State, project models.DBApplication) error {
 
 	err := fetchRepoChanges(state, project, dir)
 	if err != nil {
-		return fmt.Errorf("error fetching repository: %v", err)
+		return fmt.Errorf("error fetching repository: %w", err)
 	}
 	return nil
 }

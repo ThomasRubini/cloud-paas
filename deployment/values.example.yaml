@@ -1,24 +1,34 @@
-registry:
-  registry_repo_uri: "harbor.phoenix.dopolytech.fr/library"
-  registry_user: "admin"
-  registry_password: "CHANGE_ME"
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: paas.cassiopeia.dopolytech.fr
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: paas-tls
+     hosts:
+       - paas.cassiopeia.dopolytech.fr
 
-postgres:
-  postgres_password: "CHANGE_ME"
+registry:
+  repo_uri: "harbor.phoenix.dopolytech.fr/library"
+  user: "admin"
+  password: "CHANGE_ME"
 
 image:
   tag: "latest" # Override the versionning of the chart
 
-env:
-  - name: OIDC_BASE_URL
-    value: "http://localhost:7079"
-  - name: OIDC_USER_ID
-    value: "paas-backend"
-  - name: OIDC_USER_PASSWORD
-    value: "paas-backend"
-  - name: OIDC_REALM
-    value: "master"
-  - name: OIDC_CLIENT_ID
-    value: "paas-backend"
-  - name: OIDC_CLIENT_SECRET
-    value: "paas-backend"
+app:
+  oidc:
+    base_url: "http://localhost:7079"
+    user_id: "paas-backend"
+    user_password: "paas-backend"
+    realm: "master"
+    client_id: "paas-backend"
+    client_secret: "paas-backend"
+  registry:
+    uri: "harbor.phoenix.dopolytech.fr/library"
+    user: "admin"
+    password: "CHANGE_ME"

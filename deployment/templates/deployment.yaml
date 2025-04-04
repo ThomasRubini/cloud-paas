@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "deployment.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "deployment.selectorLabels" . | nindent 6 }}
@@ -33,13 +31,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: cloud-paas
+        - name: {{ .Chart.Name }}
           resources:
             limits:
               memory: {{ .Values.resources.limits.memory }}
             requests:
               memory: {{ .Values.resources.requests.memory }}
-        - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
@@ -50,11 +47,57 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          {{- if .Values.env }}
+          
           env:
-          -  
-            {{- toYaml .Values.env | nindent 12 }}
-          {{- end }}
+            - name: DB_URL
+              value: {{ .Values.db.url | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db_password
+                  name: paas-secrets
+
+            - name: REPO_FETCH_ENABLE
+              value: {{ .Values.app.repo_fetch.enable | quote }}
+            - name: REPO_FETCH_PERIOD_SECS
+              value: {{ .Values.app.repo_fetch.period_secs | quote }}
+            - name: REPO_DIR
+              value: {{ .Values.app.repo_dir | quote }}
+
+            - name: SECRETS_IMPL
+              value: {{ .Values.app.secrets.impl | quote }}
+            - name: SECRETS_IMPL_FILE
+              value: {{ .Values.app.secrets.impl_file | quote }}
+
+            - name: REGISTRY_REPO_URI
+              valueFrom:
+                secretKeyRef:
+                  key: registry_repo_uri
+                  name: paas-secrets
+            - name: REGISTRY_USER
+              valueFrom:
+                secretKeyRef:
+                  key: registry_user
+                  name: paas-secrets
+            - name: REGISTRY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: registry_password
+                  name: paas-secrets
+
+            - name: OIDC_BASE_URL
+              value: "http://localhost:7079"
+            - name: OIDC_USER_ID
+              value: "paas-backend"
+            - name: OIDC_USER_PASSWORD
+              value: "paas-backend"
+            - name: OIDC_REALM
+              value: "master"
+            - name: OIDC_CLIENT_ID
+              value: "paas-backend"
+            - name: OIDC_CLIENT_SECRET
+              value: "paas-backend"
+
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

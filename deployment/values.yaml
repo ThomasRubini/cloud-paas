@@ -15,7 +15,7 @@ image:
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false # FIXME
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
@@ -30,23 +30,6 @@ service:
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 8080
-
-# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
-ingress:
-  enabled: true
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: paas.cassiopeia.dopolytech.fr
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls:
-   - secretName: paas-tls
-     hosts:
-       - paas.cassiopeia.dopolytech.fr
 
 resources:
   limits:
@@ -66,54 +49,34 @@ readinessProbe:
     path: /
     port: 8080
 
+# FIXME
+volumes:
+  - name: paas-data
+    persistentVolumeClaim:
+      claimName: paas-data
 
-# Additional volumes on the output Deployment definition.
-volumes: []
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
+volumeMounts:
+  - name: paas-data
+    mountPath: /paas-data
 
-env:
-  - name: DB_URL
-    value: "host=paas-postgresql user=paas dbname=paas"
-  - name: DB_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        key: postgres_password
-        name: paas-secrets
-  - name: REPO_FETCH_ENABLE
-    value: "true"
-  - name: REPO_FETCH_PERIOD_SECS
-    value: "120"
-  - name: REPO_DIR
-    value: "/tmp/repos"
-  - name: SECRETS_IMPL
-    value: "file"
-  - name: SECRETS_IMPL_FILE
-    value: "./paas-data/secrets.json"
-  - name: REGISTRY_REPO_URI
-    valueFrom:
-      secretKeyRef:
-        key: registry_repo_uri
-        name: paas-secrets
-  - name: REGISTRY_USER
-    valueFrom:
-      secretKeyRef:REGISTRY_REPO_URI
-        key: registry_user
-        name: paas-secrets
-  - name: REGISTRY_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        key: registry_password
-        name: paas-secrets
+db:
+  password: &db_password "paas"
+  url: "host=paas-postgresql user=paas dbname=paas" #FIXME
 
+app:
+  repo_fetch:
+    enable: true
+    period_secs: 120
+  repo_dir: "/paas-data/repos"
+  secrets:
+    impl: "file"
+    impl_file: "/paas-data/secrets.json"
 
 postgresql:
   enabled: true
   auth:
     username: paas
-    password: "paas"
+    password: *db_password
     database: paas
   primary:
     persistence:

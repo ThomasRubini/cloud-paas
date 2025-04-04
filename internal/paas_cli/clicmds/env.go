@@ -83,12 +83,6 @@ func createEnvAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("env name is required")
 	}
 
-	branchName := cmd.String("branch")
-	// Check if the branch name is provided
-	if branchName == "" {
-		return fmt.Errorf("branch name is required")
-	}
-
 	env := comm.CreateEnvRequest{
 		Name:   envName,
 		Branch: cmd.String("branch"),

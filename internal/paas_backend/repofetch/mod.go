@@ -32,7 +32,7 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 		if isDir(project.GetPath()) {
 			commits, err = getAllEnvBranchesLastCommit(project)
 			if err != nil {
-				return fmt.Errorf("error getting all env branches last commit: %v", err)
+				return fmt.Errorf("error getting all env branches last commit: %w", err)
 			}
 		}
 		err = fetchRepository(state, project)
@@ -42,7 +42,7 @@ func HandleRepository(state utils.State, project models.DBApplication) error {
 
 		new_commits, err := getAllEnvBranchesLastCommit(project)
 		if err != nil {
-			return fmt.Errorf("error getting all env branches last commit: %v", err)
+			return fmt.Errorf("error getting all env branches last commit: %w", err)
 		}
 		// Check if the commits have changed
 		for _, env := range project.Envs {
@@ -75,7 +75,7 @@ func handleRepositories() error {
 	for _, project := range projects {
 		err := HandleRepository(state, project)
 		if err != nil {
-			return fmt.Errorf("error handling cron update for project %v: %v", project.Name, err)
+			logrus.Errorf("error handling cron update for project %s: %v", project.Name, err)
 		}
 	}
 

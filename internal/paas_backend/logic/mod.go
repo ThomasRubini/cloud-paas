@@ -10,15 +10,13 @@ import (
 )
 
 // Event called when a repository is updated
-func HandleEnvironmentUpdate(env models.DBEnvironment) error {
+func HandleEnvironmentUpdate(app models.DBApplication, env models.DBEnvironment) error {
 	// At this point the repository as already been updated
 
 	// Rebuild the image using the updated repository
 	// TODO what to name the tags ?
-	project := env.Application
-
-	imageTag := fmt.Sprintf("%s/%s:%s", config.Get().REGISTRY_REPO_URI, project.Name, env.Name)
-	err := imgbuild.Build(project.GetPath(), imageTag)
+	imageTag := fmt.Sprintf("%s/%s:%s", config.Get().REGISTRY_REPO_URI, app.Name, env.Name)
+	err := imgbuild.BuildGitBranch(app.GetPath(), env.Branch, imageTag)
 	if err != nil {
 		return fmt.Errorf("error building image: %w", err)
 	}

@@ -201,7 +201,7 @@ func updateEnv(c *gin.Context) {
 		return
 	}
 
-	utils.CopyFields(&request, &env)
+	utils.CopyFields(&request, env)
 
 	// Update db
 	if err := state.Db.Model(&env).Updates(&request).Error; err != nil {

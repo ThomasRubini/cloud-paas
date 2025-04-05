@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "deployment.fullname" . }}
+  labels:
+    {{- include "deployment.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "deployment.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "deployment.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "deployment.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          resources:
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              ephemeral-storage: "2Gi"
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          
+          env:
+            - name: DB_URL
+              value: {{ .Values.db.url | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db_password
+                  name: paas-secrets
+
+            - name: REPO_FETCH_ENABLE
+              value: {{ .Values.app.repo_fetch.enable | quote }}
+            - name: REPO_FETCH_PERIOD_SECS
+              value: {{ .Values.app.repo_fetch.period_secs | quote }}
+            - name: REPO_DIR
+              value: {{ .Values.app.repo_dir | quote }}
+
+            - name: SECRETS_IMPL
+              value: {{ .Values.app.secrets.impl | quote }}
+            - name: SECRETS_IMPL_FILE
+              value: {{ .Values.app.secrets.impl_file | quote }}
+
+            - name: REGISTRY_REPO_URI
+              valueFrom:
+                secretKeyRef:
+                  key: registry_repo_uri
+                  name: paas-secrets
+            - name: REGISTRY_USER
+              valueFrom:
+                secretKeyRef:
+                  key: registry_user
+                  name: paas-secrets
+            - name: REGISTRY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: registry_password
+                  name: paas-secrets
+
+            - name: OIDC_BASE_URL
+              value: "http://localhost:7079"
+            - name: OIDC_USER_ID
+              value: "paas-backend"
+            - name: OIDC_USER_PASSWORD
+              value: "paas-backend"
+            - name: OIDC_REALM
+              value: "master"
+            - name: OIDC_CLIENT_ID
+              value: "paas-backend"
+            - name: OIDC_CLIENT_SECRET
+              value: "paas-backend"
+
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

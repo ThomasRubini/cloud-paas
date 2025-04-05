@@ -3,14 +3,14 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: paas.cassiopeia.dopolytech.fr
+    - host: paas.phoenix.dopolytech.fr
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
    - secretName: paas-tls
      hosts:
-       - paas.cassiopeia.dopolytech.fr
+       - paas.phoenix.dopolytech.fr
 
 registry:
   repo_uri: "harbor.phoenix.dopolytech.fr/library"

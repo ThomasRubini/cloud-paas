@@ -53,7 +53,7 @@ func HandleRepositoryPull(state utils.State, project models.DBApplication) error
 	// Check if the commits have changed
 	for _, env := range project.Envs {
 		if oldBranches[env.Branch] != newBranches[env.Branch] {
-			logrus.Info("New commit for env ", env.Name, " on branch ", env.Branch)
+			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
 			err := logic.HandleEnvironmentUpdate(project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)

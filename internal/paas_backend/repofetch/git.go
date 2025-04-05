@@ -30,7 +30,7 @@ func getAuth(state utils.State, project models.DBApplication) (transport.AuthMet
 }
 
 func initRepoIfNotExists(project models.DBApplication, dir string) error {
-	repo, err := git.PlainInit(dir, false)
+	repo, err := git.PlainInit(dir, true)
 	if err != nil {
 		return fmt.Errorf("error initializing repository: %w", err)
 	}
@@ -67,7 +67,7 @@ func fetchRepoChanges(state utils.State, project models.DBApplication, dir strin
 }
 
 func fetchRepository(state utils.State, project models.DBApplication) error {
-	logrus.Infof("Fetching repository for project %s", project.Name)
+	logrus.Debugf("Fetching repository %v for project %s", project.SourceURL, project.Name)
 	dir := project.GetPath()
 
 	if !isDir(dir) {
@@ -81,5 +81,7 @@ func fetchRepository(state utils.State, project models.DBApplication) error {
 	if err != nil {
 		return fmt.Errorf("error fetching repository: %w", err)
 	}
+
+	logrus.Debugf("Repository for project %s fetched successfully", project.Name)
 	return nil
 }

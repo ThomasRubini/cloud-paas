@@ -37,6 +37,8 @@ func HandleRepositoryPull(state utils.State, project models.DBApplication) error
 			return fmt.Errorf("error getting all env branches last commit: %w", err)
 		}
 	}
+	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), project.Name)
+
 	err = fetchRepository(state, project)
 	if err != nil {
 		return fmt.Errorf("error fetching repository: %w", err)
@@ -46,11 +48,13 @@ func HandleRepositoryPull(state utils.State, project models.DBApplication) error
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
+	logrus.Debugf("Collected %v branches for project %s after fetching", len(newBranches), project.Name)
+
 	// Check if the commits have changed
 	for _, env := range project.Envs {
 		if oldBranches[env.Branch] != newBranches[env.Branch] {
 			logrus.Info("New commit for env ", env.Name, " on branch ", env.Branch)
-			err := logic.HandleEnvironmentUpdate(env)
+			err := logic.HandleEnvironmentUpdate(project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}

@@ -126,12 +126,12 @@ func BuildGitBranch(repoPath string, branch string, tag string) error {
 	buildCtx := bytes.Buffer{}
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
-		return fmt.Errorf("failed to open git repository - %s", err)
+		return fmt.Errorf("failed to open git repository: %w", err)
 	}
 
 	err = writeTarFromBranch(repo, &buildCtx, fmt.Sprintf("refs/remotes/origin/%s", branch))
 	if err != nil {
-		return fmt.Errorf("failed to tar build context - %w", err)
+		return fmt.Errorf("failed to tar build context: %w", err)
 	}
 
 	resp, err := cli.ImageBuild(ctx, &buildCtx, buildOpts)

@@ -2,5 +2,8 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 16.5.0
-digest: sha256:5373c798723e4bae61ecad80eb196375a02d8fde0881959d639c46d4e40be58b
-generated: "2025-03-30T21:01:16.197334768+02:00"
+- name: docker-registry
+  repository: https://helm.twun.io
+  version: 2.2.3
+digest: sha256:8f321c3389648f4269b0e540cea4e477d6b80a389d3b284bdd5c2673fef50958
+generated: "2025-04-05T23:42:14.054539604+02:00"

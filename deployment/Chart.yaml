@@ -28,3 +28,6 @@ dependencies:
     version: "16.5.0"
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
+  - name: docker-registry
+    version: "2.2.3"
+    repository: "https://helm.twun.io"

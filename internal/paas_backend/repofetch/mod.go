@@ -54,7 +54,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	for _, env := range project.Envs {
 		if oldBranches[env.Branch] != newBranches[env.Branch] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
-			err := logic.HandleEnvironmentUpdate(project, env)
+			err := logic.HandleEnvironmentUpdate(state, project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}

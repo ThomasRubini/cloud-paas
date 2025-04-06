@@ -111,13 +111,8 @@ func writeTarFromBranch(repo *git.Repository, w io.Writer, revision string) erro
 // Builds an image from the last commit of a given branch, and assigns it the given tags
 // On error, returns logs from the build process
 // The branch worktree must contain a Dockerfile
-func BuildGitBranch(repoPath string, branch string, tag string) error {
+func BuildGitBranch(dockerClient *client.Client, repoPath string, branch string, tag string) error {
 	logrus.Debugf("Building image at %s", repoPath)
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		logrus.Fatalf("cli error - %s", err)
-	}
 
 	buildOpts := types.ImageBuildOptions{
 		Tags: []string{tag},
@@ -134,7 +129,7 @@ func BuildGitBranch(repoPath string, branch string, tag string) error {
 		return fmt.Errorf("failed to tar build context: %w", err)
 	}
 
-	resp, err := cli.ImageBuild(ctx, &buildCtx, buildOpts)
+	resp, err := dockerClient.ImageBuild(context.Background(), &buildCtx, buildOpts)
 	if err != nil {
 		return fmt.Errorf("failed to build image: %w", err)
 	}

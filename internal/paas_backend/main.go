@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"runtime/debug"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
@@ -22,6 +23,28 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+func printBuildInfo() {
+	var rev string
+	var time string
+	var modified bool
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				rev = setting.Value[0:7]
+			} else if setting.Key == "vcs.time" {
+				time = setting.Value
+			} else if setting.Key == "vcs.modified" {
+				modified = setting.Value == "true"
+			}
+		}
+	}
+	if rev != "" || time != "" {
+		fmt.Printf("Program built at %v from commit %v (dirty=%v)\n", time, rev, modified)
+	} else {
+		fmt.Printf("Could not retrieve build info\n")
+	}
+}
 
 func connectToDB() (*gorm.DB, error) {
 	c := config.Get()
@@ -129,6 +152,7 @@ func constructState(conf config.Config) (*utils.State, error) {
 }
 
 func Entrypoint() {
+	printBuildInfo()
 	config.Init()
 	setupLogging()
 

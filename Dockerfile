@@ -2,12 +2,15 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add make
+# git is to have build information in the binary
+RUN apk add make git
 
 COPY go.mod go.sum ./
 
 RUN go mod download
 
+# To have build information in the binary
+COPY .git .git
 COPY internal internal
 COPY cmd cmd
 COPY Makefile .

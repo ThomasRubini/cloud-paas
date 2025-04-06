@@ -27,4 +27,8 @@ spec:
           env:
             - name: DOCKER_TLS_CERTDIR
               value: ""
+          command:
+            - "dockerd"
+            - "--host=tcp://0.0.0.0:2375"
+            - "--insecure-registry=paas-docker-registry:5000"
 {{- end }}

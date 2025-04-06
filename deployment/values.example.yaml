@@ -24,6 +24,6 @@ app:
     client_id: "paas-backend"
     client_secret: "paas-backend"
   registry:
-    repo_uri: "harbor.phoenix.dopolytech.fr/library"
+    repo_uri: "myprivaterepo.local/library"
     user: "admin"
     password: "CHANGE_ME"

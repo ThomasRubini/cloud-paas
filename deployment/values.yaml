@@ -79,6 +79,10 @@ app:
   secrets:
     impl: "file"
     impl_file: "/paas-data/secrets.json"
+  registry:
+    repo_uri: "http://paas-docker-registry:5000/library"
+    user: ""
+    password: ""
 
 postgresql:
   enabled: true

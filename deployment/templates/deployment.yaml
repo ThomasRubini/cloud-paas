@@ -80,11 +80,13 @@ spec:
                 secretKeyRef:
                   key: registry_user
                   name: paas-secrets
+                  optional: true
             - name: REGISTRY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: registry_password
                   name: paas-secrets
+                  optional: true
 
             - name: OIDC_BASE_URL
               value: "http://localhost:7079"

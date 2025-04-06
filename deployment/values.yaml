@@ -3,9 +3,6 @@ docker:
   image: "docker:28.0.4-dind"
   replicas: 1
   resources:
-    limits:
-      memory: "2Gi"
-      cpu: "2"
     requests:
       memory: "1Gi"
       cpu: "500m"

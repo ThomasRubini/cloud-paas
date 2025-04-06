@@ -26,6 +26,8 @@ func connectToDB() (*gorm.DB, error) {
 	}
 	logrus.Debug("Connected to database !")
 
+	db = db.Set("gorm:auto_preload", true)
+
 	return db, nil
 }
 

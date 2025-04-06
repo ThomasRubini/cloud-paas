@@ -1,16 +1,21 @@
 package imgbuild
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/go-connections/nat"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 )
 
 type BuildError struct {
@@ -22,10 +27,92 @@ func (e *BuildError) Error() string {
 	return fmt.Sprintf("Build failed (error: %s)", e.BuildErrorMsg)
 }
 
-// Builds an image from a directory containing a Dockerfile, and assigns it the given tags
+// Credits: https://github.com/go-git/go-git/issues/231#issuecomment-782835827
+// Generates a tarball from the given branch of the repository
+func writeTarFromBranch(repo *git.Repository, w io.Writer, revision string) error {
+	hash, err := repo.ResolveRevision(plumbing.Revision(revision))
+	if err != nil {
+		return err
+	}
+
+	// Get the corresponding commit hash.
+	obj, err := repo.CommitObject(*hash)
+	if err != nil {
+		return err
+	}
+
+	// Let's have a look at the tree at that commit.
+	tree, err := repo.TreeObject(obj.TreeHash)
+	if err != nil {
+		return err
+	}
+
+	type carrier struct {
+		f *object.File
+		r io.ReadCloser
+	}
+
+	files := make(chan carrier, 1000)
+	g := &errgroup.Group{}
+
+	g.Go(func() error {
+		tarball := tar.NewWriter(w)
+
+		for c := range files {
+			err := tarball.WriteHeader(&tar.Header{
+				Name: c.f.Name,
+				Mode: 0600,
+				Size: int64(c.f.Size),
+			})
+			if err != nil {
+				return fmt.Errorf("failed to write header for file %s: %w", c.f.Name, err)
+			}
+
+			content, err := io.ReadAll(c.r)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %w", c.f.Name, err)
+			}
+
+			_, err = tarball.Write(content)
+			if err != nil {
+				return fmt.Errorf("failed to write file %s: %w", c.f.Name, err)
+			}
+
+			err = c.r.Close()
+			if err != nil {
+				return fmt.Errorf("failed to close file %s: %w", c.f.Name, err)
+			}
+		}
+
+		return tarball.Close()
+	})
+
+	addFile := func(f *object.File) error {
+		fr, err := f.Reader()
+		if err != nil {
+			return err
+		}
+
+		files <- carrier{f, fr}
+
+		return nil
+	}
+
+	err = tree.Files().ForEach(addFile)
+	if err != nil {
+		return err
+	}
+
+	close(files)
+
+	return g.Wait()
+}
+
+// Builds an image from the last commit of a given branch, and assigns it the given tags
 // On error, returns logs from the build process
-func Build(buildContextPath string, tag string) error {
-	logrus.Debugf("Building image at %s", buildContextPath)
+// The branch worktree must contain a Dockerfile
+func BuildGitBranch(repoPath string, branch string, tag string) error {
+	logrus.Debugf("Building image at %s", repoPath)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
@@ -36,20 +123,25 @@ func Build(buildContextPath string, tag string) error {
 		Tags: []string{tag},
 	}
 
-	buildCtx, err := archive.TarWithOptions(buildContextPath, &archive.TarOptions{})
+	buildCtx := bytes.Buffer{}
+	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
-		return fmt.Errorf("failed to tar build context - %w", err)
+		return fmt.Errorf("failed to open git repository: %w", err)
 	}
 
-	resp, err := cli.ImageBuild(ctx, buildCtx, buildOpts)
+	err = writeTarFromBranch(repo, &buildCtx, fmt.Sprintf("refs/remotes/origin/%s", branch))
 	if err != nil {
-		return fmt.Errorf("failed to build image - %w", err)
+		return fmt.Errorf("failed to tar build context: %w", err)
+	}
+
+	resp, err := cli.ImageBuild(ctx, &buildCtx, buildOpts)
+	if err != nil {
+		return fmt.Errorf("failed to build image: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// récupère le flux du build docker (le print dans le terminal)
+	// Get messages from the build process
 	buf := bytes.Buffer{}
-	//c'est lui qui récupères jcrois et il écrit dans buf
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, &buf, 0, false, nil)
 	if err != nil {
 		return &BuildError{
@@ -58,7 +150,7 @@ func Build(buildContextPath string, tag string) error {
 		}
 	}
 
-	logrus.Debugf("Built image at %s successfully", buildContextPath)
+	logrus.Debugf("Built image at %s successfully", repoPath)
 	return nil
 }
 

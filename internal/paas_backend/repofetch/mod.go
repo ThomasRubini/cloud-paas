@@ -24,35 +24,39 @@ func isDir(path string) bool {
 }
 
 // called on every repository on a schedule to pull them and update them
-func HandleRepository(state utils.State, project models.DBApplication) error {
+func FetchAndDeployRepository(state utils.State, project models.DBApplication) error {
 	if project.SourceURL == "" {
 		logrus.Infof("Skipping %s (empty source URL)", project.Name)
-	} else {
-		commits := make(map[string]string)
-		var err error
-		if isDir(project.GetPath()) {
-			commits, err = getAllEnvBranchesLastCommit(project)
-			if err != nil {
-				return fmt.Errorf("error getting all env branches last commit: %w", err)
-			}
-		}
-		err = fetchRepository(state, project)
-		if err != nil {
-			return fmt.Errorf("error fetching repository: %w", err)
-		}
-
-		new_commits, err := getAllEnvBranchesLastCommit(project)
+		return nil
+	}
+	oldBranches := make(map[string]string)
+	var err error
+	if isDir(project.GetPath()) {
+		oldBranches, err = getAllEnvBranchesLastCommit(project)
 		if err != nil {
 			return fmt.Errorf("error getting all env branches last commit: %w", err)
 		}
-		// Check if the commits have changed
-		for _, env := range project.Envs {
-			if commits[env.Branch] != new_commits[env.Branch] {
-				logrus.Info("New commit for env ", env.Name, " on branch ", env.Branch)
-				err := logic.HandleEnvironmentUpdate(env)
-				if err != nil {
-					return fmt.Errorf("error handling repository update: %w", err)
-				}
+	}
+	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), project.Name)
+
+	err = fetchRepository(state, project)
+	if err != nil {
+		return fmt.Errorf("error fetching repository: %w", err)
+	}
+
+	newBranches, err := getAllEnvBranchesLastCommit(project)
+	if err != nil {
+		return fmt.Errorf("error getting all env branches last commit: %w", err)
+	}
+	logrus.Debugf("Collected %v branches for project %s after fetching", len(newBranches), project.Name)
+
+	// Check if the commits have changed
+	for _, env := range project.Envs {
+		if oldBranches[env.Branch] != newBranches[env.Branch] {
+			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
+			err := logic.HandleEnvironmentUpdate(project, env)
+			if err != nil {
+				return fmt.Errorf("error handling repository update: %w", err)
 			}
 		}
 	}
@@ -74,7 +78,8 @@ func handleRepositories() error {
 	logrus.Infof("Found %d projects to pull", len(projects))
 
 	for _, project := range projects {
-		err := HandleRepository(state, project)
+		logrus.Debugf("Handling pulling project %v", project.Name)
+		err := FetchAndDeployRepository(state, project)
 		if err != nil {
 			logrus.Errorf("error handling cron update for project %s: %v", project.Name, err)
 		}

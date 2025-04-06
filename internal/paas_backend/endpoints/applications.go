@@ -231,7 +231,7 @@ func redeployApp(c *gin.Context) {
 		return
 	}
 
-	err := repofetch.HandleRepository(state, app)
+	err := repofetch.FetchAndDeployRepository(state, app)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

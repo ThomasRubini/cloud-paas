@@ -150,6 +150,7 @@ func Entrypoint() {
 		logrus.Info("Repository fetch crontab disabled")
 	}
 
+	logrus.Info("Setup finished successfully. Starting to serve incoming requests.")
 	// Launch web server. Function will never return
 	launchWebServer(g)
 }

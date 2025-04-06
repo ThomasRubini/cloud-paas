@@ -98,6 +98,9 @@ spec:
               value: "paas-backend"
             - name: OIDC_CLIENT_SECRET
               value: "paas-backend"
+            
+            - name: DOCKER_HOST
+              value: "tcp://docker-daemon:2375"
 
           {{- with .Values.livenessProbe }}
           livenessProbe:

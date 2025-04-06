@@ -1,6 +1,14 @@
-# Default values for deployment.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+docker:
+  enabled: true
+  image: "docker:28.0.4-dind"
+  replicas: 1
+  resources:
+    limits:
+      memory: "2Gi"
+      cpu: "2"
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 1

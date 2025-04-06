@@ -116,7 +116,7 @@ func constructState(conf config.Config) (*utils.State, error) {
 	}
 
 	// Get docker client
-	dockerClient, err := client.NewClientWithOpts()
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker client: %w", err)
 	}

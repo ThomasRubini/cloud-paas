@@ -1,0 +1,18 @@
+{{- if .Values.docker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-daemon
+spec:
+  ports:
+    - name: docker-insecure
+      port: 2375
+      targetPort: 2375
+      protocol: TCP
+    - name: docker-secure
+      port: 2376
+      targetPort: 2376
+      protocol: TCP
+  selector:
+    app: docker-daemon
+{{- end }}

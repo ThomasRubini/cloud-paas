@@ -24,7 +24,7 @@ func isDir(path string) bool {
 }
 
 // called on every repository on a schedule to pull them and update them
-func HandleRepositoryPull(state utils.State, project models.DBApplication) error {
+func FetchAndDeployRepository(state utils.State, project models.DBApplication) error {
 	if project.SourceURL == "" {
 		logrus.Infof("Skipping %s (empty source URL)", project.Name)
 		return nil
@@ -79,7 +79,7 @@ func handleRepositories() error {
 
 	for _, project := range projects {
 		logrus.Debugf("Handling pulling project %v", project.Name)
-		err := HandleRepositoryPull(state, project)
+		err := FetchAndDeployRepository(state, project)
 		if err != nil {
 			logrus.Errorf("error handling cron update for project %s: %v", project.Name, err)
 		}

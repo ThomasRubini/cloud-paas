@@ -2,14 +2,20 @@
 package paas_backend
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
+	"github.com/docker/docker/api/types/registry"
+	"github.com/docker/docker/client"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/cli"
 
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
 	"github.com/sirupsen/logrus"
@@ -76,28 +82,65 @@ func getSecretsProvider() secretsprovider.Helper {
 	}
 }
 
+func constructState(conf config.Config) (*utils.State, error) {
+	// Connect to DB
+	db, err := connectToDB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+	if err := MigrateModels(db); err != nil {
+		return nil, fmt.Errorf("failed to run database migrations: %w", err)
+	}
+
+	// Get docker client
+	dockerClient, err := client.NewClientWithOpts()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create docker client: %w", err)
+	}
+
+	// Test registry connection
+	_, err = dockerClient.RegistryLogin(context.Background(), registry.AuthConfig{
+		Username:      conf.REGISTRY_USER,
+		Password:      conf.REGISTRY_PASSWORD,
+		ServerAddress: conf.REGISTRY_REPO_URI,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to login to registry: %w", err)
+	}
+
+	// Get helm client
+	settings := cli.New()
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), "default", "memory", log.Printf); err != nil {
+		return nil, fmt.Errorf("error initializing config: %w", err)
+	}
+	// Test it
+	if err = actionConfig.KubeClient.IsReachable(); err != nil {
+		return nil, fmt.Errorf("failed to connect to kubernetes cluster: %w", err)
+	}
+
+	// Construct state
+	return &utils.State{
+		Db:              db,
+		DockerClient:    dockerClient,
+		HelmConfig:      actionConfig,
+		SecretsProvider: getSecretsProvider(),
+	}, nil
+}
+
 func Entrypoint() {
 	config.Init()
 	setupLogging()
 
-	// Connect to DB
-	db, err := connectToDB()
-	if err != nil {
-		logrus.Fatalf("Failed to connect to database: %v", err)
-	}
-	if err := MigrateModels(db); err != nil {
-		logrus.Fatalf("Failed to run database migrations: %v", err)
-	}
-
 	// Setup state (note: we assign to the global variable here)
-	state := utils.State{
-		Db:              db,
-		SecretsProvider: getSecretsProvider(),
+	state, err := constructState(config.Get())
+	if err != nil {
+		logrus.Fatalf("Failed to construct state: %v", err)
 	}
-	utils.SetState(state)
+	utils.SetState(*state)
 
 	// Setup web server
-	g := SetupWebServer(state)
+	g := SetupWebServer(*state)
 
 	// init crontab for fetching repos
 	if config.Get().REPO_FETCH_ENABLE {

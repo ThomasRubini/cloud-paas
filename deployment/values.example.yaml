@@ -12,11 +12,6 @@ ingress:
      hosts:
        - paas.phoenix.dopolytech.fr
 
-registry:
-  repo_uri: "harbor.phoenix.dopolytech.fr/library"
-  user: "admin"
-  password: "CHANGE_ME"
-
 image:
   tag: "latest" # Override the versionning of the chart
 
@@ -29,6 +24,6 @@ app:
     client_id: "paas-backend"
     client_secret: "paas-backend"
   registry:
-    uri: "harbor.phoenix.dopolytech.fr/library"
+    repo_uri: "harbor.phoenix.dopolytech.fr/library"
     user: "admin"
     password: "CHANGE_ME"

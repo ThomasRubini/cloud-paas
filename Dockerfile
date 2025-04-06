@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 RUN adduser -D -g '' user
 
-FROM scratch
+FROM alpine:latest
 COPY --from=builder /etc/passwd /etc/passwd
 USER user
 

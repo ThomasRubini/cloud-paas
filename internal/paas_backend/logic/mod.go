@@ -27,7 +27,7 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 		return fmt.Errorf("error uploading image to registry: %w", err)
 	}
 
-	port := imgbuild.GetExposedPort(imageTag)
+	port := imgbuild.GetExposedPort(state.DockerClient, imageTag)
 
 	// Redeploy using the new image
 	err = deploy.DeployApp(state.HelmConfig, env, deploy.Options{

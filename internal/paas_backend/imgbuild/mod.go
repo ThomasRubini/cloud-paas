@@ -149,16 +149,10 @@ func BuildGitBranch(dockerClient *client.Client, repoPath string, branch string,
 	return nil
 }
 
-func GetExposedPort(tag string) *int {
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts()
+func GetExposedPort(dockerClient *client.Client, tag string) *int {
+	imageInspect, _, err := dockerClient.ImageInspectWithRaw(context.Background(), tag)
 	if err != nil {
-		logrus.Errorf("Docker client error - %s", err)
-		return nil
-	}
-	imageInspect, _, err := cli.ImageInspectWithRaw(ctx, tag)
-	if err != nil {
-		logrus.Errorf("Docker inspect error - %s", err)
+		logrus.Errorf("Docker inspect error: %v", err)
 		return nil
 	}
 

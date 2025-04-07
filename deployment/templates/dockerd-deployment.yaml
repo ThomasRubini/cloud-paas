@@ -30,5 +30,5 @@ spec:
           command:
             - "dockerd"
             - "--host=tcp://0.0.0.0:2375"
-            - "--insecure-registry=paas-docker-registry:5000"
+            - "--insecure-registry=paas-docker-registry.paas.svc.cluster.local:5000"
 {{- end }}

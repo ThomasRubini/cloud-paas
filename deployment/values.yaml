@@ -77,7 +77,7 @@ app:
     impl: "file"
     impl_file: "/paas-data/secrets.json"
   registry:
-    repo_uri: "paas-docker-registry:5000/library"
+    repo_uri: "paas-docker-registry.paas.svc.cluster.local:5000/library"
     user: ""
     password: ""
 

@@ -65,7 +65,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 }
 
 func handleRepositories() error {
-	logrus.Info("Pulling repositories at", time.Now())
+	logrus.Info("Pulling repositories due to recurring task")
 
 	// Get state
 	state := utils.GetState()
@@ -122,11 +122,14 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 
 func Init(period int) {
 	go func() {
-		err := handleRepositories()
-		if err != nil {
-			logrus.Errorf("Error pulling repositories: %v", err)
-		}
+		for {
+			err := handleRepositories()
+			if err != nil {
+				logrus.Errorf("Error pulling repositories: %v", err)
+			}
+			logrus.Debugf("Finished pulling repositories, sleeping for %d seconds", period)
 
-		time.Sleep(time.Duration(period) * time.Second)
+			time.Sleep(time.Duration(period) * time.Second)
+		}
 	}()
 }

@@ -33,8 +33,8 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 	err = deploy.DeployApp(state.HelmConfig, env, deploy.Options{
 		ImageTag:    imageTag,
 		ExposedPort: *port,
-		Namespace:   env.Application.Name,
-		ReleaseName: fmt.Sprintf("%s-%s", app.Name, env.Name),
+		Namespace:   app.Name,
+		ReleaseName: fmt.Sprintf("paas-%s-%s", app.Name, env.Name),
 	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %w", err)

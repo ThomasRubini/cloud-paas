@@ -13,10 +13,6 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
-func getDeploymentName(env models.DBEnvironment) string {
-	return fmt.Sprintf("%v-%v", env.Application.Name, env.Name)
-}
-
 func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, error) {
 	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
@@ -26,7 +22,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 
 	myChart := &chart.Chart{
 		Metadata: &chart.Metadata{
-			Name:       getDeploymentName(env),
+			Name:       options.ReleaseName,
 			APIVersion: "v2",
 			Version:    "0.1.0",
 		},
@@ -37,7 +33,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 			},
 		},
 		Values: map[string]interface{}{
-			"deploymentName": getDeploymentName(env),
+			"deploymentName": options.ReleaseName,
 			"namespace":      options.Namespace,
 			"replicaCount":   1,
 			"image":          options.ImageTag,

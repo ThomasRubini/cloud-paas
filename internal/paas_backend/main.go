@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"runtime/debug"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
@@ -69,16 +70,30 @@ func MigrateModels(db *gorm.DB) error {
 	return nil
 }
 
-func setupLogging() {
-	var cliVerbose bool
-	var cliTrace bool
-	flag.BoolVar(&cliVerbose, "v", false, "enable verbose logging")
-	flag.BoolVar(&cliTrace, "vv", false, "enable trace logging")
+func setupLogging(conf *config.Config) {
+	var logVerbose bool
+	var logTrace bool
+	flag.BoolVar(&logVerbose, "v", false, "enable verbose logging")
+	flag.BoolVar(&logTrace, "vv", false, "enable trace logging")
 	flag.Parse()
 
-	if cliTrace {
+	switch conf.VERBOSE {
+	case "1":
+		logVerbose = true
+	case "2":
+		logVerbose = true
+		logTrace = true
+	case "0":
+	case "":
+		break
+	default:
+		fmt.Printf("Invalid VERBOSE environment variable value: %s\n", conf.VERBOSE)
+		os.Exit(1)
+	}
+
+	if logTrace {
 		logrus.SetLevel(logrus.TraceLevel)
-	} else if cliVerbose || config.Get().VERBOSE {
+	} else if logVerbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
@@ -152,7 +167,8 @@ func constructState(conf config.Config) (*utils.State, error) {
 func Entrypoint() {
 	printBuildInfo()
 	config.Init()
-	setupLogging()
+	conf := config.Get()
+	setupLogging(&conf)
 
 	// Setup state (note: we assign to the global variable here)
 	state, err := constructState(config.Get())

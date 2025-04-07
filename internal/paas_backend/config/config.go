@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	VERBOSE                bool   `env:"VERBOSE" envDefault:"false"`
+	VERBOSE                string `env:"VERBOSE" envDefault:""`
 	REPO_FETCH_ENABLE      bool   `env:"REPO_FETCH_ENABLE" envDefault:"true"`
 	REPO_FETCH_PERIOD_SECS int    `env:"REPO_FETCH_PERIOD_SECS"`
 	REPO_DIR               string `env:"REPO_DIR"`

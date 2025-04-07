@@ -50,6 +50,9 @@ spec:
               protocol: TCP
           
           env:
+            - name: VERBOSE
+              value: {{ .Values.app.verbose | quote }}
+
             - name: DB_URL
               value: {{ .Values.db.url | quote }}
             - name: DB_PASSWORD

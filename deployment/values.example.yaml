@@ -16,6 +16,7 @@ image:
   tag: "latest" # Override the versionning of the chart
 
 app:
+  verbose: "0"
   oidc:
     base_url: "http://localhost:7079"
     user_id: "paas-backend"

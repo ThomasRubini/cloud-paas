@@ -48,9 +48,9 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 	return myChart, nil
 }
 
-func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, env models.DBEnvironment, options Options) (*release.Release, error) {
+func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
 	install := action.NewInstall(helmConfig)
-	install.ReleaseName = env.Application.Name
+	install.ReleaseName = options.ReleaseName
 	install.Namespace = options.Namespace
 	install.Wait = true
 	install.Atomic = true
@@ -69,6 +69,7 @@ type Options struct {
 	Namespace   string
 	ImageTag    string
 	ExposedPort int
+	ReleaseName string
 }
 
 func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
@@ -79,7 +80,7 @@ func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, optio
 		return fmt.Errorf("error generating chart: %w", err)
 	}
 
-	_, err = installHelmChart(helmConfig, myChart, env, options)
+	_, err = installHelmChart(helmConfig, myChart, options)
 	if err != nil {
 		return fmt.Errorf("error installing chart: %w", err)
 	}

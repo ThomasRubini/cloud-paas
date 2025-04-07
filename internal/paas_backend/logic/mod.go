@@ -34,6 +34,7 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 		ImageTag:    imageTag,
 		ExposedPort: *port,
 		Namespace:   env.Application.Name,
+		ReleaseName: fmt.Sprintf("%s-%s", app.Name, env.Name),
 	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %w", err)

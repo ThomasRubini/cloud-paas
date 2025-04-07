@@ -13,7 +13,7 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 )
 
-func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, error) {
+func generateChart(options Options) (*chart.Chart, error) {
 	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
 	if err != nil {
@@ -69,9 +69,9 @@ type Options struct {
 }
 
 func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
-	logrus.Debugf("Deploying app %v:%v", env.Application.Name, env.Name)
+	logrus.Debugf("Deploying release %v", options.ReleaseName)
 
-	myChart, err := generateChart(env, options)
+	myChart, err := generateChart(options)
 	if err != nil {
 		return fmt.Errorf("error generating chart: %w", err)
 	}
@@ -81,6 +81,6 @@ func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, optio
 		return fmt.Errorf("error installing chart: %w", err)
 	}
 
-	logrus.Debugf("Deployed app %v:%v successfully", env.Application.Name, env.Name)
+	logrus.Debugf("Deployed app %v successfully", options.ReleaseName)
 	return nil
 }

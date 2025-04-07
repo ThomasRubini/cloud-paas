@@ -18,7 +18,7 @@ func getDeploymentName(env models.DBEnvironment) string {
 }
 
 func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, error) {
-	deploymentPath := filepath.Join("dist", "deployment.yaml")
+	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
 	if err != nil {
 		return nil, err

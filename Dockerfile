@@ -23,10 +23,11 @@ RUN adduser -D -g '' user
 
 FROM alpine:latest
 COPY --from=builder /etc/passwd /etc/passwd
-USER user
 
+USER user
 WORKDIR /app
 COPY --from=builder /app/backend /app/backend
+COPY assets assets
 
 EXPOSE 8080
 CMD ["/app/backend"]

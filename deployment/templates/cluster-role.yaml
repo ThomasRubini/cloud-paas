@@ -21,6 +21,6 @@ kind: ClusterRole
 metadata:
   name: paas
 rules:
-- apiGroups: [""]
+- apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]

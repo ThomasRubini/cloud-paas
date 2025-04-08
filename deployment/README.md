@@ -16,5 +16,4 @@ This allows the k3s cluster to access the images we build and push to our local 
 # Deploy the software in k3s
 - Copy `values.yaml.example` to `values.prod.yaml` (for example)
 - Edit `values.prod.yaml` to match your environment
-- Run `kubectl create namespace paas`
-- Run `helm install paas ./ -n paas -f values.prod.yaml`
+- Run `helm upgrade -i --create-namespace paas ./ -n paas -f values.prod.yaml`

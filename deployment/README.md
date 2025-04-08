@@ -4,7 +4,7 @@
 **To deploy this software, you need a k3s cluster with modified configuration !** 
 If you do not have a cluster, you can use [k3d](https://k3d.io) to create one, by running this command in this directory: `k3d cluster create --config ./k3d_config.yaml`
 
-If you already have a cluster, you need to add the following to its configuration:
+If you already have a cluster, you need to add the following to its configuration, in `/etc/rancher/k3s/registries.yaml`:
 ```
 mirrors:
     paas-docker-registry.paas.svc.cluster.local:30005:

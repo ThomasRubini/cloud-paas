@@ -2,12 +2,15 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add make
+# git is to have build information in the binary
+RUN apk add make git
 
 COPY go.mod go.sum ./
 
 RUN go mod download
 
+# To have build information in the binary
+COPY .git .git
 COPY internal internal
 COPY cmd cmd
 COPY Makefile .
@@ -18,12 +21,13 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 RUN adduser -D -g '' user
 
-FROM scratch
+FROM alpine:latest
 COPY --from=builder /etc/passwd /etc/passwd
-USER user
 
+USER user
 WORKDIR /app
 COPY --from=builder /app/backend /app/backend
+COPY assets assets
 
 EXPOSE 8080
 CMD ["/app/backend"]

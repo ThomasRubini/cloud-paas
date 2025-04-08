@@ -23,7 +23,7 @@ func isDir(path string) bool {
 	return stat.IsDir()
 }
 
-// called on every repository on a schedule to pull them and update them
+// called on every repository on a schedule to fetch them and update them
 func FetchAndDeployRepository(state utils.State, project models.DBApplication) error {
 	if project.SourceURL == "" {
 		logrus.Infof("Skipping %s (empty source URL)", project.Name)
@@ -54,7 +54,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	for _, env := range project.Envs {
 		if oldBranches[env.Branch] != newBranches[env.Branch] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
-			err := logic.HandleEnvironmentUpdate(project, env)
+			err := logic.HandleEnvironmentUpdate(state, project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}
@@ -65,7 +65,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 }
 
 func handleRepositories() error {
-	logrus.Info("Pulling repositories at", time.Now())
+	logrus.Info("Fetching repositories due to recurring task")
 
 	// Get state
 	state := utils.GetState()
@@ -75,10 +75,10 @@ func handleRepositories() error {
 	if res.Error != nil {
 		return fmt.Errorf("error fetching project names: %w", res.Error)
 	}
-	logrus.Infof("Found %d projects to pull", len(projects))
+	logrus.Infof("Found %d projects to fetch", len(projects))
 
 	for _, project := range projects {
-		logrus.Debugf("Handling pulling project %v", project.Name)
+		logrus.Debugf("Handling fetching project %v", project.Name)
 		err := FetchAndDeployRepository(state, project)
 		if err != nil {
 			logrus.Errorf("error handling cron update for project %s: %v", project.Name, err)
@@ -122,11 +122,14 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 
 func Init(period int) {
 	go func() {
-		err := handleRepositories()
-		if err != nil {
-			logrus.Errorf("Error pulling repositories: %v", err)
-		}
+		for {
+			err := handleRepositories()
+			if err != nil {
+				logrus.Errorf("Error fetching repositories: %v", err)
+			}
+			logrus.Debugf("Finished fetching repositories, sleeping for %d seconds", period)
 
-		time.Sleep(time.Duration(period) * time.Second)
+			time.Sleep(time.Duration(period) * time.Second)
+		}
 	}()
 }

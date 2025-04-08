@@ -3,24 +3,20 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: paas.phoenix.dopolytech.fr
+    - host: localhost # change with your website domain name
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
    - secretName: paas-tls
      hosts:
-       - paas.phoenix.dopolytech.fr
-
-registry:
-  repo_uri: "harbor.phoenix.dopolytech.fr/library"
-  user: "admin"
-  password: "CHANGE_ME"
+       - localhost # change with your website domain name
 
 image:
   tag: "latest" # Override the versionning of the chart
 
 app:
+  verbose: "0"
   oidc:
     base_url: "http://localhost:7079"
     user_id: "paas-backend"
@@ -28,7 +24,3 @@ app:
     realm: "master"
     client_id: "paas-backend"
     client_secret: "paas-backend"
-  registry:
-    uri: "harbor.phoenix.dopolytech.fr/library"
-    user: "admin"
-    password: "CHANGE_ME"

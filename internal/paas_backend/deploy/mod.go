@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -11,16 +10,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 )
 
-func getDeploymentName(env models.DBEnvironment) string {
-	return fmt.Sprintf("%v-%v", env.Application.Name, env.Name)
-}
-
-func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, error) {
-	deploymentPath := filepath.Join("dist", "deployment.yaml")
+func generateChart(options Options) (*chart.Chart, error) {
+	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
 	if err != nil {
 		return nil, err
@@ -28,7 +22,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 
 	myChart := &chart.Chart{
 		Metadata: &chart.Metadata{
-			Name:       getDeploymentName(env),
+			Name:       options.ReleaseName,
 			APIVersion: "v2",
 			Version:    "0.1.0",
 		},
@@ -39,7 +33,7 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 			},
 		},
 		Values: map[string]interface{}{
-			"deploymentName": getDeploymentName(env),
+			"deploymentName": options.ReleaseName,
 			"namespace":      options.Namespace,
 			"replicaCount":   1,
 			"image":          options.ImageTag,
@@ -50,15 +44,9 @@ func generateChart(env models.DBEnvironment, options Options) (*chart.Chart, err
 	return myChart, nil
 }
 
-func installHelmChart(myChart *chart.Chart, env models.DBEnvironment, options Options) (*release.Release, error) {
-	settings := cli.New()
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), options.Namespace, "memory", log.Printf); err != nil {
-		return nil, fmt.Errorf("error initializing config: %w", err)
-	}
-
-	install := action.NewInstall(actionConfig)
-	install.ReleaseName = env.Application.Name
+func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
+	install := action.NewInstall(helmConfig)
+	install.ReleaseName = options.ReleaseName
 	install.Namespace = options.Namespace
 	install.Wait = true
 	install.Atomic = true
@@ -77,21 +65,22 @@ type Options struct {
 	Namespace   string
 	ImageTag    string
 	ExposedPort int
+	ReleaseName string
 }
 
-func DeployApp(env models.DBEnvironment, options Options) error {
-	logrus.Debugf("Deploying app %v:%v", env.Application.Name, env.Name)
+func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+	logrus.Debugf("Deploying release %v", options.ReleaseName)
 
-	myChart, err := generateChart(env, options)
+	myChart, err := generateChart(options)
 	if err != nil {
 		return fmt.Errorf("error generating chart: %w", err)
 	}
 
-	_, err = installHelmChart(myChart, env, options)
+	_, err = installHelmChart(helmConfig, myChart, options)
 	if err != nil {
 		return fmt.Errorf("error installing chart: %w", err)
 	}
 
-	logrus.Debugf("Deployed app %v:%v successfully", env.Application.Name, env.Name)
+	logrus.Debugf("Deployed app %v successfully", options.ReleaseName)
 	return nil
 }

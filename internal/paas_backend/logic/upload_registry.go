@@ -30,17 +30,11 @@ func getAuth() string {
 	return base64.StdEncoding.EncodeToString(authStr)
 }
 
-func UploadToRegistry(imageTag string) error {
+func UploadToRegistry(dockerClient *client.Client, imageTag string) error {
 	logrus.Debugf("Uploading image %v to registry..", imageTag)
 
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		return fmt.Errorf("cli error - %w", err)
-	}
-
 	// Push the image to the registry
-	resp, err := cli.ImagePush(ctx, imageTag, image.PushOptions{
+	resp, err := dockerClient.ImagePush(context.Background(), imageTag, image.PushOptions{
 		RegistryAuth: getAuth(),
 	})
 	if err != nil {

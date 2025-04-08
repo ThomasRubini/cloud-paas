@@ -1,0 +1,14 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+
+ports:
+  - port: 80:80
+    nodeFilters:
+      - loadbalancer
+
+registries:
+  config: |
+    mirrors:
+      paas-docker-registry.paas.svc.cluster.local:30005:
+        endpoint:
+          - "http://localhost:30005"

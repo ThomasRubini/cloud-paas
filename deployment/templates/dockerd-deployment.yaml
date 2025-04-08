@@ -1,0 +1,34 @@
+{{- if .Values.docker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-daemon
+  labels:
+    app: docker-daemon
+spec:
+  replicas: {{ .Values.docker.replicas }}
+  selector:
+    matchLabels:
+      app: docker-daemon
+  template:
+    metadata:
+      labels:
+        app: docker-daemon
+    spec:
+      containers:
+        - name: docker
+          image: {{ .Values.docker.image }}
+          ports:
+            - name: dind-con-port
+              containerPort: 2375
+              protocol: TCP
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          command:
+            - "dockerd"
+            - "--host=tcp://0.0.0.0:2375"
+            - "--insecure-registry=paas-docker-registry.paas.svc.cluster.local:30005"
+{{- end }}

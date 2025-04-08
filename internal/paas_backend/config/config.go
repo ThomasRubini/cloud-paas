@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	VERBOSE                bool   `env:"VERBOSE" envDefault:"false"`
+	VERBOSE                string `env:"VERBOSE" envDefault:""`
 	REPO_FETCH_ENABLE      bool   `env:"REPO_FETCH_ENABLE" envDefault:"true"`
 	REPO_FETCH_PERIOD_SECS int    `env:"REPO_FETCH_PERIOD_SECS"`
 	REPO_DIR               string `env:"REPO_DIR"`
@@ -23,8 +23,8 @@ type Config struct {
 	OIDC_REALM             string `env:"OIDC_REALM"`
 
 	REGISTRY_REPO_URI string `env:"REGISTRY_REPO_URI"`
-	REGISTRY_USER     string `env:"REGISTRY_USER"`
-	REGISTRY_PASSWORD string `env:"REGISTRY_PASSWORD"`
+	REGISTRY_USER     string `env:"REGISTRY_USER" envDefault:""`
+	REGISTRY_PASSWORD string `env:"REGISTRY_PASSWORD" envDefault:""`
 
 	SECRETS_IMPL      string `env:"SECRETS_IMPL"`
 	SECRETS_IMPL_FILE string `env:"SECRETS_IMPL_FILE" envDefault:""`

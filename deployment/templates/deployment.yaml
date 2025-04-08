@@ -11,10 +11,8 @@ spec:
       {{- include "deployment.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         {{- include "deployment.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
@@ -33,11 +31,8 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           resources:
-            limits:
-              memory: {{ .Values.resources.limits.memory }}
-              ephemeral-storage: "2Gi"
             requests:
-              memory: {{ .Values.resources.requests.memory }}
+              memory: {{ .Values.app.resources.requests.memory }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
@@ -50,6 +45,9 @@ spec:
               protocol: TCP
           
           env:
+            - name: VERBOSE
+              value: {{ .Values.app.verbose | quote }}
+
             - name: DB_URL
               value: {{ .Values.db.url | quote }}
             - name: DB_PASSWORD
@@ -80,11 +78,13 @@ spec:
                 secretKeyRef:
                   key: registry_user
                   name: paas-secrets
+                  optional: true
             - name: REGISTRY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: registry_password
                   name: paas-secrets
+                  optional: true
 
             - name: OIDC_BASE_URL
               value: "http://localhost:7079"
@@ -98,15 +98,18 @@ spec:
               value: "paas-backend"
             - name: OIDC_CLIENT_SECRET
               value: "paas-backend"
+            
+            - name: DOCKER_HOST
+              value: "tcp://docker-daemon:2375"
 
-          {{- with .Values.livenessProbe }}
           livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.readinessProbe }}
+            httpGet:
+              path: /
+              port: 8080
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            httpGet:
+              path: /
+              port: 8080
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

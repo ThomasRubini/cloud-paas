@@ -22,13 +22,20 @@ This allows the k3s cluster to access the images we build and push to our local 
 - Run `helm upgrade -i --create-namespace paas ./ -n paas -f values.prod.yaml`
 
 ### Deploying source code
-If you want to deploy from the source code instead of using the release image, you need to do the following just before installing the `helm upgrade` command:
-- `docker build . -t ghcr.io/thomasrubini/cloud-paas:latest`
-- `k3d image import ghcr.io/thomasrubini/cloud-paas:latest`
-(Adapt the tag if you changed it in your values)
+If you want to deploy from the source code instead of using the release image, you need to do the following:
 
-**If you had already deployed the software**, you need to delete the previous deployment before importing the image:
-- `kubectl delete deploy -n paas paas-deployment`
+Add this section to your `values.prod.yaml` file, to ensure the image will not be re-pulled from the public release.
+```yaml
+image:
+  pullPolicy: IfNotPresent
+```
+
+Do the following before running the `helm upgrade` command:
+- `docker build . -t ghcr.io/thomasrubini/cloud-paas:latest` (from the root of the repository, to build the image)
+- `k3d image import ghcr.io/thomasrubini/cloud-paas:latest` (import the image into your k3s cluster)
+Adapt the tag if you changed it in your values.
+
+**If you had already deployed the software**, you need to delete the previous deployment before importing the image: `kubectl delete deploy -n paas paas-deployment`
 
 ## Use in the CLI
 At the root of this repo, modify `paas_cli_config.yml` (there is a template named `paas_cli_config.example.yml`) to set `backend_url: http://localhost`. (or the URL you used to deploy the software). This will make the CLI use your fresh new deployment

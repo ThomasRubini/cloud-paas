@@ -3,14 +3,14 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: paas.phoenix.dopolytech.fr
+    - host: example.com
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
    - secretName: paas-tls
      hosts:
-       - paas.phoenix.dopolytech.fr
+       - example.com
 
 image:
   tag: "latest" # Override the versionning of the chart
@@ -24,7 +24,3 @@ app:
     realm: "master"
     client_id: "paas-backend"
     client_secret: "paas-backend"
-  registry:
-    repo_uri: "myprivaterepo.local/library"
-    user: "admin"
-    password: "CHANGE_ME"

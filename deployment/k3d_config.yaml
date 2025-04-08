@@ -1,4 +1,3 @@
-# k3d cluster create --config ./k3s_config.yaml
 apiVersion: k3d.io/v1alpha5
 kind: Simple
 

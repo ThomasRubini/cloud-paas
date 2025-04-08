@@ -28,12 +28,13 @@ Add this section to your `values.prod.yaml` file
 ```yaml
 image:
   repository: paas-backend
+  tag: latest
   pullPolicy: Never
 ```
 
 Do the following before running the `helm upgrade` command:
-- `docker build . -t paas-backend` (from the root of the repository, to build the image)
-- `k3d image import paas-backend` (import the image into your k3s cluster)
+- `docker build . -t paas-backend:latest` (from the root of the repository, to build the image)
+- `k3d image import paas-backend:latest` (import the image into your k3s cluster)
 Adapt the tag if you changed it in your values.
 
 **If you had already deployed the software**, you need to delete the previous deployment before importing the image: `kubectl delete deploy -n paas paas-deployment`

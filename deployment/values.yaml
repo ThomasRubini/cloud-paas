@@ -48,7 +48,7 @@ app:
     impl: "file"
     impl_file: "/paas-data/secrets.json"
   registry:
-    repo_uri: "paas-docker-registry.paas.svc.cluster.local:5000/library"
+    repo_uri: "paas-docker-registry.paas.svc.cluster.local:30005/library"
     user: ""
     password: ""
 
@@ -62,3 +62,11 @@ postgresql:
     persistence:
       enabled: true
       size: 8Gi
+
+docker-registry:
+  service:
+    type: NodePort
+    port: 30005
+    nodePort: 30005
+  podLabels:
+   "paas/resource": "docker-registry"

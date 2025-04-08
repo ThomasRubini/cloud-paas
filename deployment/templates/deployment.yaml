@@ -11,10 +11,8 @@ spec:
       {{- include "deployment.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         {{- include "deployment.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}

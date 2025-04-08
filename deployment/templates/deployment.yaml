@@ -107,14 +107,14 @@ spec:
             - name: DOCKER_HOST
               value: "tcp://docker-daemon:2375"
 
-          {{- with .Values.livenessProbe }}
           livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.readinessProbe }}
+            httpGet:
+              path: /
+              port: 8080
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            httpGet:
+              path: /
+              port: 8080
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

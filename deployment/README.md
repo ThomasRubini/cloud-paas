@@ -17,7 +17,7 @@ This allows the k3s cluster to access the images we build and push to our local 
 
 ### Deploying from release
 - Copy `values.example.yaml` to `values.prod.yaml` (for example)
-- Edit `values.prod.yaml` to match your environment
+- Edit `values.prod.yaml` to match your environment (if you are deploying locally, do not change the server name, keep localhost !)
 - Run `helm dependency update` to load helm dependencies that we use
 - Run `helm upgrade -i --create-namespace paas ./ -n paas -f values.prod.yaml`
 

@@ -3,14 +3,14 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: example.com
+    - host: localhost # change with your website domain name
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
    - secretName: paas-tls
      hosts:
-       - example.com
+       - localhost # change with your website domain name
 
 image:
   tag: "latest" # Override the versionning of the chart

@@ -24,15 +24,16 @@ This allows the k3s cluster to access the images we build and push to our local 
 ### Deploying source code
 If you want to deploy from the source code instead of using the release image, you need to do the following:
 
-Add this section to your `values.prod.yaml` file, to ensure the image will not be re-pulled from the public release.
+Add this section to your `values.prod.yaml` file
 ```yaml
 image:
-  pullPolicy: IfNotPresent
+  repository: paas-backend
+  pullPolicy: Never
 ```
 
 Do the following before running the `helm upgrade` command:
-- `docker build . -t ghcr.io/thomasrubini/cloud-paas:latest` (from the root of the repository, to build the image)
-- `k3d image import ghcr.io/thomasrubini/cloud-paas:latest` (import the image into your k3s cluster)
+- `docker build . -t paas-backend` (from the root of the repository, to build the image)
+- `k3d image import paas-backend` (import the image into your k3s cluster)
 Adapt the tag if you changed it in your values.
 
 **If you had already deployed the software**, you need to delete the previous deployment before importing the image: `kubectl delete deploy -n paas paas-deployment`

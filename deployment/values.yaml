@@ -20,14 +20,6 @@ service:
   type: ClusterIP
   port: 8080
 
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
 # FIXME
 volumes:
   - name: paas-data
@@ -43,6 +35,14 @@ db:
   url: "host=paas-postgresql user=paas dbname=paas" #FIXME
 
 app:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
   repo_fetch:
     enable: true
     period_secs: 120

@@ -34,10 +34,10 @@ spec:
         - name: {{ .Chart.Name }}
           resources:
             limits:
-              memory: {{ .Values.resources.limits.memory }}
+              memory: {{ .Values.app.resources.limits.memory }}
               ephemeral-storage: "2Gi"
             requests:
-              memory: {{ .Values.resources.requests.memory }}
+              memory: {{ .Values.app.resources.requests.memory }}
           {{- with .Values.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}

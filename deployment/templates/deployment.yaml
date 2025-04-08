@@ -33,9 +33,6 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           resources:
-            limits:
-              memory: {{ .Values.app.resources.limits.memory }}
-              ephemeral-storage: "2Gi"
             requests:
               memory: {{ .Values.app.resources.requests.memory }}
           {{- with .Values.securityContext }}

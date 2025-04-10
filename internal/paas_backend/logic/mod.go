@@ -14,7 +14,6 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 	// At this point the repository as already been updated
 
 	// Rebuild the image using the updated repository
-	// TODO what to name the tags ?
 	imageTag, err := imgbuild.BuildGitBranch(state.DockerClient, app, env)
 	if err != nil {
 		return fmt.Errorf("error building image: %w", err)

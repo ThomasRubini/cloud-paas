@@ -24,7 +24,7 @@ func isDir(path string) bool {
 	return stat.IsDir()
 }
 
-// called on every repository on a schedule to fetch them and update them
+// called on every repository on a schedule to fetch them, and deploy any needed environments
 func FetchAndDeployRepository(state utils.State, project models.DBApplication) error {
 	if project.SourceURL == "" {
 		logrus.Infof("Skipping %s (empty source URL)", project.Name)
@@ -74,6 +74,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	return nil
 }
 
+// Fetch every repository, and deploy needed environments
 func handleRepositories() error {
 	logrus.Info("Fetching repositories due to recurring task")
 
@@ -98,6 +99,8 @@ func handleRepositories() error {
 	return nil
 }
 
+// Get the last commit of all branches matching an environment for a given project
+// Returns a map of environment name -> last correspondig branch commit hash
 func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]string, error) {
 	dir := project.GetPath()
 	repo, err := git.PlainOpen(dir)
@@ -130,6 +133,7 @@ func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]strin
 	return branchesLastCommit, nil
 }
 
+// Start the repository fetcher task
 func Init(period int) {
 	go func() {
 		for {

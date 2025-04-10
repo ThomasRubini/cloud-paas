@@ -32,18 +32,17 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 
 	// Init repo if it doesn't exist
-	err := initRepoIfNotExists(project, project.GetPath())
-	if err != nil {
-		return fmt.Errorf("error initializing repository: %w", err)
+	if !isDir(project.GetPath()) {
+		err := setupRepo(project, project.GetPath())
+		if err != nil {
+			return fmt.Errorf("error doing a repository setup : %w", err)
+		}
 	}
 
 	// Collect branches data before fetching
-	oldBranches := make(map[string]string)
-	if isDir(project.GetPath()) {
-		oldBranches, err = getAllEnvBranchesLastCommit(project)
-		if err != nil {
-			return fmt.Errorf("error getting all env branches last commit: %w", err)
-		}
+	oldBranches, err := getAllEnvBranchesLastCommit(project)
+	if err != nil {
+		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
 	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), project.Name)
 

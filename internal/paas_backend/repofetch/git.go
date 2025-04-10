@@ -29,7 +29,7 @@ func getAuth(state utils.State, project models.DBApplication) (transport.AuthMet
 	}, nil
 }
 
-func initRepoIfNotExists(project models.DBApplication, dir string) error {
+func setupRepo(project models.DBApplication, dir string) error {
 	repo, err := git.PlainInit(dir, true)
 	if err != nil {
 		return fmt.Errorf("error initializing repository: %w", err)

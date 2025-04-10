@@ -3,7 +3,6 @@ package logic
 import (
 	"fmt"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/deploy"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/imgbuild"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
@@ -16,8 +15,7 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 
 	// Rebuild the image using the updated repository
 	// TODO what to name the tags ?
-	imageTag := fmt.Sprintf("%s/%s:%s", config.Get().REGISTRY_REPO_URI, app.Name, env.Name)
-	err := imgbuild.BuildGitBranch(state.DockerClient, app.GetPath(), env.Branch, imageTag)
+	imageTag, err := imgbuild.BuildGitBranch(state.DockerClient, app, env)
 	if err != nil {
 		return fmt.Errorf("error building image: %w", err)
 	}

@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Check if a given directory path exists
 func isDir(path string) bool {
 	stat, err := os.Stat(path)
 	if err != nil {

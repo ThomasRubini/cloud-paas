@@ -30,8 +30,15 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 		logrus.Infof("Skipping %s (empty source URL)", project.Name)
 		return nil
 	}
+
+	// Init repo if it doesn't exist
+	err := initRepoIfNotExists(project, project.GetPath())
+	if err != nil {
+		return fmt.Errorf("error initializing repository: %w", err)
+	}
+
+	// Collect branches data before fetching
 	oldBranches := make(map[string]string)
-	var err error
 	if isDir(project.GetPath()) {
 		oldBranches, err = getAllEnvBranchesLastCommit(project)
 		if err != nil {
@@ -40,18 +47,20 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), project.Name)
 
-	err = fetchRepository(state, project)
+	// Fetch data from remote
+	err = fetchRepoChanges(state, project)
 	if err != nil {
 		return fmt.Errorf("error fetching repository: %w", err)
 	}
 
+	// Collect branches data after fetching
 	newBranches, err := getAllEnvBranchesLastCommit(project)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
 	logrus.Debugf("Collected %v branches for project %s after fetching", len(newBranches), project.Name)
 
-	// Check if the commits have changed
+	// Check if the commits have changed by comparing branches data of before & after fetching
 	for _, env := range project.Envs {
 		if oldBranches[env.Branch] != newBranches[env.Branch] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)

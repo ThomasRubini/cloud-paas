@@ -45,8 +45,9 @@ func initRepoIfNotExists(project models.DBApplication, dir string) error {
 	return nil
 }
 
-func fetchRepoChanges(state utils.State, project models.DBApplication, dir string) error {
-	repo, err := git.PlainOpen(dir)
+func fetchRepoChanges(state utils.State, project models.DBApplication) error {
+	logrus.Debugf("Fetching repository %v for project %s", project.SourceURL, project.Name)
+	repo, err := git.PlainOpen(project.GetPath())
 	if err != nil {
 		return fmt.Errorf("error opening repository: %w", err)
 	}
@@ -60,28 +61,16 @@ func fetchRepoChanges(state utils.State, project models.DBApplication, dir strin
 		RemoteName: "origin",
 		Auth:       auth,
 	})
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return fmt.Errorf("error fetching repository: %w", err)
-	}
-	return nil
-}
-
-func fetchRepository(state utils.State, project models.DBApplication) error {
-	logrus.Debugf("Fetching repository %v for project %s", project.SourceURL, project.Name)
-	dir := project.GetPath()
-
-	if !isDir(dir) {
-		err := initRepoIfNotExists(project, dir)
-		if err != nil {
-			return err
-		}
-	}
-
-	err := fetchRepoChanges(state, project, dir)
 	if err != nil {
-		return fmt.Errorf("error fetching repository: %w", err)
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			logrus.Debugf("Repository %s fetched successfully (already up to date)", project.Name)
+		} else {
+			return fmt.Errorf("error fetching repository: %w", err)
+		}
+	} else {
+		logrus.Debugf("Repository %s fetched successfully (new data was fetched)", project.Name)
+		return nil
 	}
 
-	logrus.Debugf("Repository for project %s fetched successfully", project.Name)
 	return nil
 }

@@ -57,17 +57,18 @@ func applyHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, opti
 	histClient.Max = 1
 	versions, err := histClient.Run(options.ReleaseName)
 	if errors.Is(err, driver.ErrReleaseNotFound) || isReleaseUninstalled(versions) {
-		return installHelmChart(helmConfig, myChart, options)
+		return installHelmChart(helmConfig, myChart, options, isReleaseUninstalled(versions))
 	} else {
 		return upgradeHelmChart(helmConfig, myChart, options)
 	}
 }
 
-func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
-	logrus.Debugf("Installing release %v", options.ReleaseName)
+func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options, isUninstalled bool) (*release.Release, error) {
+	logrus.Debugf("using Install action for release %v (isUninstalled=%v)", options.ReleaseName, isUninstalled)
 	install := action.NewInstall(helmConfig)
 	install.ReleaseName = options.ReleaseName
 	install.CreateNamespace = true
+	install.Replace = isUninstalled
 
 	install.Namespace = options.Namespace
 	install.Wait = true
@@ -83,7 +84,7 @@ func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, op
 }
 
 func upgradeHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
-	logrus.Debugf("Upgrading release %v", options.ReleaseName)
+	logrus.Debugf("Using Upgrade action for release %v", options.ReleaseName)
 	upgrade := action.NewUpgrade(helmConfig)
 
 	upgrade.Namespace = options.Namespace

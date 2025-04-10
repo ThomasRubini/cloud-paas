@@ -64,6 +64,7 @@ func applyHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, opti
 }
 
 func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
+	logrus.Debugf("Installing release %v", options.ReleaseName)
 	install := action.NewInstall(helmConfig)
 	install.ReleaseName = options.ReleaseName
 	install.CreateNamespace = true
@@ -82,6 +83,7 @@ func installHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, op
 }
 
 func upgradeHelmChart(helmConfig *action.Configuration, myChart *chart.Chart, options Options) (*release.Release, error) {
+	logrus.Debugf("Upgrading release %v", options.ReleaseName)
 	upgrade := action.NewUpgrade(helmConfig)
 
 	upgrade.Namespace = options.Namespace

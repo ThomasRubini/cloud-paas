@@ -20,7 +20,7 @@ import (
 func GetHelmConfig(namespace string) (*action.Configuration, error) {
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), "default", "secret", log.Printf); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, "secret", log.Printf); err != nil {
 		return nil, fmt.Errorf("error initializing config: %w", err)
 	}
 	return actionConfig, nil

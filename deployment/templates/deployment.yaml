@@ -85,6 +85,8 @@ spec:
                   key: registry_password
                   name: paas-secrets
                   optional: true
+            - name: REGISTRY_TAG_PREFIX
+              value: {{ .Values.app.registry.tag_prefix | quote }}
 
             - name: OIDC_BASE_URL
               value: "http://localhost:7079"
@@ -101,6 +103,8 @@ spec:
             
             - name: DOCKER_HOST
               value: "tcp://docker-daemon:2375"
+            - name: KUBE_NAMESPACE_PREFIX
+              value: {{ .Values.app.kube.deployment_prefix | quote }}
 
           livenessProbe:
             httpGet:

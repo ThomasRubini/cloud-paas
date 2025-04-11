@@ -3,6 +3,7 @@ package logic
 import (
 	"fmt"
 
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/deploy"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/imgbuild"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
@@ -36,8 +37,8 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	err = deploy.DeployEnv(l.State.HelmConfig, env, deploy.Options{
 		ImageTag:    imageTag,
 		ExposedPort: *port,
-		Namespace:   app.Name,
-		ReleaseName: fmt.Sprintf("paas-%s-%s", app.Name, env.Name),
+		Namespace:   fmt.Sprintf("%s-%s", config.Get().KUBE_NAMESPACE_PREFIX, app.Name),
+		ReleaseName: fmt.Sprintf("%s-%s", app.Name, env.Name),
 	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %w", err)

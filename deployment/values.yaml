@@ -39,7 +39,6 @@ app:
     requests:
       cpu: 100m
       memory: 128Mi
-
   repo_fetch:
     enable: true
     period_secs: 120
@@ -51,6 +50,9 @@ app:
     repo_uri: "paas-docker-registry.paas.svc.cluster.local:30005/library"
     user: ""
     password: ""
+    tag_prefix: paas
+  kube:
+    deployment_prefix: paas
 
 postgresql:
   enabled: true

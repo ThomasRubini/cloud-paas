@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
@@ -33,12 +34,24 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	// Get the exposed port from the image
 	port := imgbuild.GetExposedPort(l.State.DockerClient, imageTag)
 
+	parsedEnv := make(map[string]any)
+	err = json.Unmarshal([]byte(env.EnvVars), &parsedEnv)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling environment variables: %w", err)
+	}
+	parsedEnvStr := make(map[string]string)
+	//avoid type misparsing from Kubernetes
+	for k, v := range parsedEnv {
+		parsedEnvStr[k] = fmt.Sprintf("%v", v)
+	}
+
 	// Redeploy to kubernetes using the new image
 	err = deploy.DeployEnv(env, deploy.Options{
 		ImageTag:    imageTag,
 		ExposedPort: *port,
 		Namespace:   fmt.Sprintf("%s-%s", config.Get().KUBE_NAMESPACE_PREFIX, app.Name),
 		ReleaseName: fmt.Sprintf("%s-%s", app.Name, env.Name),
+		EnvVars:     parsedEnvStr,
 	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %w", err)

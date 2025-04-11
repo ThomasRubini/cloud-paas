@@ -5,11 +5,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"runtime/debug"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/deploy"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
@@ -17,8 +17,6 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/cli"
 
 	_ "github.com/ThomasRubini/cloud-paas/internal/paas_backend/docs"
 	"github.com/sirupsen/logrus"
@@ -145,14 +143,12 @@ func constructState(conf *config.Config) (utils.State, error) {
 		return nil, fmt.Errorf("failed to login to registry: %w", err)
 	}
 
-	// Get helm client
-	settings := cli.New()
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), "default", "secret", log.Printf); err != nil {
-		return nil, fmt.Errorf("error initializing config: %w", err)
+	// Test helm client
+	helmClient, err := deploy.GetHelmConfig("default")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create helm client: %w", err)
 	}
-	// Test it
-	if err = actionConfig.KubeClient.IsReachable(); err != nil {
+	if err = helmClient.KubeClient.IsReachable(); err != nil {
 		return nil, fmt.Errorf("failed to connect to kubernetes cluster: %w", err)
 	}
 
@@ -161,7 +157,6 @@ func constructState(conf *config.Config) (utils.State, error) {
 		Config:          conf,
 		Db:              db,
 		DockerClient:    dockerClient,
-		HelmConfig:      actionConfig,
 		SecretsProvider: getSecretsProvider(),
 	}, nil
 }

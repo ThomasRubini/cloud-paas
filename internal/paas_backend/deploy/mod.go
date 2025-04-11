@@ -3,6 +3,7 @@ package deploy
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -11,9 +12,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
+
+func GetHelmConfig(namespace string) (*action.Configuration, error) {
+	settings := cli.New()
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, "secret", log.Printf); err != nil {
+		return nil, fmt.Errorf("error initializing config: %w", err)
+	}
+	return actionConfig, nil
+}
 
 func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, error) {
 
@@ -123,8 +134,12 @@ type Options struct {
 	ReleaseName string
 }
 
-func DeployEnv(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+func DeployEnv(env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Deploying release %v", options.ReleaseName)
+	helmConfig, err := GetHelmConfig(options.Namespace)
+	if err != nil {
+		return fmt.Errorf("error getting helm config: %w", err)
+	}
 
 	myChart, err := generateChart(options, env)
 	if err != nil {
@@ -140,14 +155,18 @@ func DeployEnv(helmConfig *action.Configuration, env models.DBEnvironment, optio
 	return nil
 }
 
-func UninstallEnv(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+func UninstallEnv(env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Uninstalling release %v", options.ReleaseName)
+	helmConfig, err := GetHelmConfig(options.Namespace)
+	if err != nil {
+		return fmt.Errorf("error getting helm config: %w", err)
+	}
 
 	uninstall := action.NewUninstall(helmConfig)
 	uninstall.Timeout = 30 * time.Second
 	uninstall.Wait = true
 
-	_, err := uninstall.Run(options.ReleaseName)
+	_, err = uninstall.Run(options.ReleaseName)
 	if err != nil {
 		return fmt.Errorf("error uninstalling chart: %w", err)
 	}

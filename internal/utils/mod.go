@@ -8,7 +8,6 @@ import (
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/docker/docker/client"
 	"gorm.io/gorm"
-	"helm.sh/helm/v3/pkg/action"
 )
 
 type State *StateStruct
@@ -20,7 +19,6 @@ type StateStruct struct {
 	Db              *gorm.DB
 	SecretsProvider secretsprovider.Helper
 	DockerClient    *client.Client
-	HelmConfig      *action.Configuration
 }
 
 var state *State

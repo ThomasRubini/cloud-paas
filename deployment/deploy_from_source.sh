@@ -1,5 +1,8 @@
 # Build and deploy the paas-backend image from source code to the k3d cluster
 # Must be run from this directory
+
+cd "$(dirname "$0")"/.. # Go to parent directory of this script (project root)
+
 set -xe
 docker build . -t paas-backend:latest
 kubectl delete deploy -n paas paas-deployment || true

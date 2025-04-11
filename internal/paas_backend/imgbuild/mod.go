@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
@@ -29,12 +31,7 @@ func (e *BuildError) Error() string {
 
 // Credits: https://github.com/go-git/go-git/issues/231#issuecomment-782835827
 // Generates a tarball from the given branch of the repository
-func writeTarFromBranch(repo *git.Repository, w io.Writer, revision string) error {
-	hash, err := repo.ResolveRevision(plumbing.Revision(revision))
-	if err != nil {
-		return err
-	}
-
+func writeTarFromCommit(repo *git.Repository, w io.Writer, hash *plumbing.Hash) error {
 	// Get the corresponding commit hash.
 	obj, err := repo.CommitObject(*hash)
 	if err != nil {
@@ -111,27 +108,40 @@ func writeTarFromBranch(repo *git.Repository, w io.Writer, revision string) erro
 // Builds an image from the last commit of a given branch, and assigns it the given tags
 // On error, returns logs from the build process
 // The branch worktree must contain a Dockerfile
-func BuildGitBranch(dockerClient *client.Client, repoPath string, branch string, tag string) error {
+func BuildGitBranch(dockerClient *client.Client, app models.DBApplication, env models.DBEnvironment) (string, error) {
+	repoPath := app.GetPath()
 	logrus.Debugf("Building image at %s", repoPath)
-
-	buildOpts := types.ImageBuildOptions{
-		Tags: []string{tag},
-	}
 
 	buildCtx := bytes.Buffer{}
 	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
-		return fmt.Errorf("failed to open git repository: %w", err)
+		return "", fmt.Errorf("failed to open git repository: %w", err)
 	}
 
-	err = writeTarFromBranch(repo, &buildCtx, fmt.Sprintf("refs/remotes/origin/%s", branch))
+	// Get commit hash of the branch
+	rev := fmt.Sprintf("refs/remotes/origin/%s", env.Branch)
+	hash, err := repo.ResolveRevision(plumbing.Revision(rev))
 	if err != nil {
-		return fmt.Errorf("failed to tar build context: %w", err)
+		return "", fmt.Errorf("failed to resolve revision %s: %w", rev, err)
 	}
 
+	// Generate image tag
+	imageTag := fmt.Sprintf("%s/%s/%s:%s", config.Get().REGISTRY_REPO_URI, app.Name, env.Name, hash.String())
+
+	// Generate tarball from the branch
+	err = writeTarFromCommit(repo, &buildCtx, hash)
+	if err != nil {
+		return "", fmt.Errorf("failed to tar build context: %w", err)
+	}
+
+	// Build the image
+	logrus.Debugf("Building image with tag %s", imageTag)
+	buildOpts := types.ImageBuildOptions{
+		Tags: []string{imageTag},
+	}
 	resp, err := dockerClient.ImageBuild(context.Background(), &buildCtx, buildOpts)
 	if err != nil {
-		return fmt.Errorf("failed to build image: %w", err)
+		return "", fmt.Errorf("failed to build image: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -139,14 +149,14 @@ func BuildGitBranch(dockerClient *client.Client, repoPath string, branch string,
 	buf := bytes.Buffer{}
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, &buf, 0, false, nil)
 	if err != nil {
-		return &BuildError{
+		return "", &BuildError{
 			Logs:          buf.String(),
 			BuildErrorMsg: err.Error(),
 		}
 	}
 
 	logrus.Debugf("Built image at %s successfully", repoPath)
-	return nil
+	return imageTag, nil
 }
 
 func GetExposedPort(dockerClient *client.Client, tag string) *int {

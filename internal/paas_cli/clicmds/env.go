@@ -41,9 +41,10 @@ var envCreateCmd = &cli.Command{
 			Aliases:  []string{"b"},
 		},
 		&cli.StringFlag{
-			Name:    "domain",
-			Usage:   "Domain to use for the environment",
-			Aliases: []string{"d"},
+			Name:     "domain",
+			Usage:    "Domain to use for the environment",
+			Required: true,
+			Aliases:  []string{"d"},
 		},
 	},
 }

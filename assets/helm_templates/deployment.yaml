@@ -7,11 +7,11 @@ spec:
   replicas: 1  # TODO: Scaling
   selector:
     matchLabels:
-      app: '{{ .Values.deploymentName }}'
+      app.kubernetes.io/name: '{{ .Values.deploymentName }}'
   template:
     metadata:
       labels:
-        app: '{{ .Values.deploymentName }}'
+        app.kubernetes.io/name: '{{ .Values.deploymentName }}'
     spec:
       containers:
         - name: '{{ .Values.deploymentName }}'

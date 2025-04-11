@@ -15,11 +15,31 @@ import (
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
-func generateChart(options Options) (*chart.Chart, error) {
-	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
-	deploymentData, err := os.ReadFile(deploymentPath)
+func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, error) {
+
+	templates := []*chart.File{}
+	err := filepath.Walk("assets/helm_templates", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			relativePath, relErr := filepath.Rel("assets/helm_templates", path)
+			if relErr != nil {
+				return relErr
+			}
+			templates = append(templates, &chart.File{
+				Name: filepath.Join("templates", relativePath),
+				Data: data,
+			})
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading helm templates: %w", err)
 	}
 
 	myChart := &chart.Chart{
@@ -28,18 +48,14 @@ func generateChart(options Options) (*chart.Chart, error) {
 			APIVersion: "v2",
 			Version:    "0.1.0",
 		},
-		Templates: []*chart.File{
-			{
-				Name: "templates/deployment.yaml",
-				Data: deploymentData,
-			},
-		},
+		Templates: templates,
 		Values: map[string]interface{}{
 			"deploymentName": options.ReleaseName,
 			"namespace":      options.Namespace,
-			"replicaCount":   1,
+			"replicaCount":   1, // TODO: Add autoscaling later
 			"image":          options.ImageTag,
 			"containerPort":  options.ExposedPort,
+			"domain":         env.Domain,
 		},
 	}
 
@@ -110,7 +126,7 @@ type Options struct {
 func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Deploying release %v", options.ReleaseName)
 
-	myChart, err := generateChart(options)
+	myChart, err := generateChart(options, env)
 	if err != nil {
 		return fmt.Errorf("error generating chart: %w", err)
 	}

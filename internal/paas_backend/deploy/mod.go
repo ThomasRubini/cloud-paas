@@ -16,22 +16,30 @@ import (
 )
 
 func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, error) {
-	deploymentPath := filepath.Join("assets", "helm_templates", "deployment.yaml")
-	deploymentData, err := os.ReadFile(deploymentPath)
-	if err != nil {
-		return nil, err
-	}
 
-	ingressPath := filepath.Join("assets", "helm_templates", "ingress.yaml")
-	ingressData, err := os.ReadFile(ingressPath)
+	templates := []*chart.File{}
+	err := filepath.Walk("assets/helm_templates", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			relativePath, relErr := filepath.Rel("assets/helm_templates", path)
+			if relErr != nil {
+				return relErr
+			}
+			templates = append(templates, &chart.File{
+				Name: filepath.Join("templates", relativePath),
+				Data: data,
+			})
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, err
-	}
-
-	servicePath := filepath.Join("assets", "helm_templates", "service.yaml")
-	serviceData, err := os.ReadFile(servicePath)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading helm templates: %w", err)
 	}
 
 	myChart := &chart.Chart{
@@ -40,20 +48,7 @@ func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, err
 			APIVersion: "v2",
 			Version:    "0.1.0",
 		},
-		Templates: []*chart.File{
-			{
-				Name: "templates/deployment.yaml",
-				Data: deploymentData,
-			},
-			{
-				Name: "templates/service.yaml",
-				Data: serviceData,
-			},
-			{
-				Name: "templates/ingress.yaml",
-				Data: ingressData,
-			},
-		},
+		Templates: templates,
 		Values: map[string]interface{}{
 			"deploymentName": options.ReleaseName,
 			"namespace":      options.Namespace,

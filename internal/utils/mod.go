@@ -4,13 +4,18 @@ import (
 	"reflect"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/interfaces"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/docker/docker/client"
 	"gorm.io/gorm"
 	"helm.sh/helm/v3/pkg/action"
 )
 
-type State struct {
+type State *StateStruct
+
+type StateStruct struct {
+	LogicModule interfaces.Logic
+
 	Config          *config.Config
 	Db              *gorm.DB
 	SecretsProvider secretsprovider.Helper

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/go-git/go-git/v5"
@@ -65,7 +64,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 		logrus.Debugf("Comparing env %s: %s -> %s", env.Name, oldBranches[env.Name], newBranches[env.Name])
 		if oldBranches[env.Name] != newBranches[env.Name] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
-			err := logic.HandleEnvironmentUpdate(state, project, env)
+			err := state.LogicModule.HandleEnvironmentUpdate(project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}

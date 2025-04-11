@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -123,7 +122,7 @@ func createEnv(c *gin.Context) {
 	}
 
 	// Create deployment
-	err := logic.HandleEnvironmentUpdate(state, app, newEnv)
+	err := state.LogicModule.HandleEnvironmentUpdate(app, newEnv)
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})
 		return
@@ -220,7 +219,7 @@ func updateEnv(c *gin.Context) {
 	}
 
 	// Update deployment
-	err = logic.HandleEnvironmentUpdate(state, app, *env)
+	err = state.LogicModule.HandleEnvironmentUpdate(app, *env)
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})
 		return

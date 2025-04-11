@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -18,6 +20,13 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+type FakeLogic struct {
+}
+
+func (FakeLogic) HandleEnvironmentUpdate(app models.DBApplication, env models.DBEnvironment) error {
+	return nil
+}
 
 func fakeState(t *testing.T) utils.State {
 	gorm_db, err := gorm.Open(sqlite.Open(":memory:"))
@@ -37,7 +46,9 @@ func fakeState(t *testing.T) utils.State {
 		os.RemoveAll(tmpDir)
 	})
 
-	return utils.State{
+	return &utils.StateStruct{
+		LogicModule:     &FakeLogic{},
+		Config:          &config.Config{},
 		Db:              gorm_db,
 		SecretsProvider: secretsprovider.Helper{Core: secretsprovider.FromFile(filepath.Join(tmpDir, "/secrets.json"))},
 	}

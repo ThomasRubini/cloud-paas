@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/go-git/go-git/v5"
@@ -32,15 +31,16 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 
 	// Init repo if it doesn't exist
-	if !isDir(project.GetPath()) {
-		err := setupRepo(project, project.GetPath())
+	repoPath := project.GetPath(state.Config)
+	if !isDir(repoPath) {
+		err := setupRepo(project, repoPath)
 		if err != nil {
 			return fmt.Errorf("error doing a repository setup : %w", err)
 		}
 	}
 
 	// Collect branches data before fetching
-	oldBranches, err := getAllEnvBranchesLastCommit(project)
+	oldBranches, err := getAllEnvBranchesLastCommit(state, project)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
@@ -53,7 +53,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 
 	// Collect branches data after fetching
-	newBranches, err := getAllEnvBranchesLastCommit(project)
+	newBranches, err := getAllEnvBranchesLastCommit(state, project)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
@@ -64,7 +64,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 		logrus.Debugf("Comparing env %s: %s -> %s", env.Name, oldBranches[env.Name], newBranches[env.Name])
 		if oldBranches[env.Name] != newBranches[env.Name] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
-			err := logic.HandleEnvironmentUpdate(state, project, env)
+			err := state.LogicModule.HandleEnvironmentUpdate(project, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}
@@ -101,8 +101,8 @@ func handleRepositories() error {
 
 // Get the last commit of all branches matching an environment for a given project
 // Returns a map of environment name -> last correspondig branch commit hash
-func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]string, error) {
-	dir := project.GetPath()
+func getAllEnvBranchesLastCommit(state utils.State, project models.DBApplication) (map[string]string, error) {
+	dir := project.GetPath(state.Config)
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return nil, fmt.Errorf("error opening repository for project %v : %w", project, err)

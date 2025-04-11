@@ -10,6 +10,7 @@ import (
 	"runtime/debug"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
@@ -118,7 +119,7 @@ func getSecretsProvider() secretsprovider.Helper {
 	}
 }
 
-func constructState(conf config.Config) (*utils.State, error) {
+func constructState(conf *config.Config) (utils.State, error) {
 	// Connect to DB
 	db, err := connectToDB()
 	if err != nil {
@@ -156,7 +157,8 @@ func constructState(conf config.Config) (*utils.State, error) {
 	}
 
 	// Construct state
-	return &utils.State{
+	return &utils.StateStruct{
+		Config:          conf,
 		Db:              db,
 		DockerClient:    dockerClient,
 		HelmConfig:      actionConfig,
@@ -168,17 +170,22 @@ func Entrypoint() {
 	printBuildInfo()
 	config.Init()
 	conf := config.Get()
-	setupLogging(&conf)
+	setupLogging(conf)
 
 	// Setup state (note: we assign to the global variable here)
 	state, err := constructState(config.Get())
 	if err != nil {
 		logrus.Fatalf("Failed to construct state: %v", err)
 	}
-	utils.SetState(*state)
+	utils.SetState(state)
+
+	logic_mod := logic.LogicImpl{
+		State: state,
+	}
+	state.LogicModule = &logic_mod
 
 	// Setup web server
-	g := SetupWebServer(*state)
+	g := SetupWebServer(state)
 
 	// init crontab for fetching repos
 	if config.Get().REPO_FETCH_ENABLE {

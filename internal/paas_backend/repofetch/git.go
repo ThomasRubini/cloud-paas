@@ -47,7 +47,7 @@ func setupRepo(project models.DBApplication, dir string) error {
 
 func fetchRepoChanges(state utils.State, project models.DBApplication) error {
 	logrus.Debugf("Fetching repository %v for project %s", project.SourceURL, project.Name)
-	repo, err := git.PlainOpen(project.GetPath())
+	repo, err := git.PlainOpen(project.GetPath(state.Config))
 	if err != nil {
 		return fmt.Errorf("error opening repository: %w", err)
 	}

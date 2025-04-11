@@ -32,15 +32,16 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 
 	// Init repo if it doesn't exist
-	if !isDir(project.GetPath()) {
-		err := setupRepo(project, project.GetPath())
+	repoPath := project.GetPath(state.Config)
+	if !isDir(repoPath) {
+		err := setupRepo(project, repoPath)
 		if err != nil {
 			return fmt.Errorf("error doing a repository setup : %w", err)
 		}
 	}
 
 	// Collect branches data before fetching
-	oldBranches, err := getAllEnvBranchesLastCommit(project)
+	oldBranches, err := getAllEnvBranchesLastCommit(state, project)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
@@ -53,7 +54,7 @@ func FetchAndDeployRepository(state utils.State, project models.DBApplication) e
 	}
 
 	// Collect branches data after fetching
-	newBranches, err := getAllEnvBranchesLastCommit(project)
+	newBranches, err := getAllEnvBranchesLastCommit(state, project)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
@@ -101,8 +102,8 @@ func handleRepositories() error {
 
 // Get the last commit of all branches matching an environment for a given project
 // Returns a map of environment name -> last correspondig branch commit hash
-func getAllEnvBranchesLastCommit(project models.DBApplication) (map[string]string, error) {
-	dir := project.GetPath()
+func getAllEnvBranchesLastCommit(state utils.State, project models.DBApplication) (map[string]string, error) {
+	dir := project.GetPath(state.Config)
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
 		return nil, fmt.Errorf("error opening repository for project %v : %w", project, err)

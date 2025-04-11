@@ -16,8 +16,8 @@ type DBApplication struct {
 	Envs       []DBEnvironment `gorm:"foreignKey:ApplicationID"`
 }
 
-func (p DBApplication) GetPath() string {
-	rootPath := config.Get().REPO_DIR
+func (p DBApplication) GetPath(conf *config.Config) string {
+	rootPath := conf.REPO_DIR
 	// TODO use project ID for folder
 	return path.Join(rootPath, p.Name)
 }

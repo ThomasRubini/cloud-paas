@@ -7,16 +7,14 @@ import (
 	"fmt"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/docker/cli/cli/config/types"
 	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/sirupsen/logrus"
 )
 
-func getAuth() string {
-	conf := config.Get()
-
+func getAuth(conf *config.Config) string {
 	auth := types.AuthConfig{
 		Username: conf.REGISTRY_USER,
 		Password: conf.REGISTRY_PASSWORD,
@@ -30,12 +28,12 @@ func getAuth() string {
 	return base64.StdEncoding.EncodeToString(authStr)
 }
 
-func UploadToRegistry(dockerClient *client.Client, imageTag string) error {
+func UploadToRegistry(state utils.State, imageTag string) error {
 	logrus.Debugf("Uploading image %v to registry..", imageTag)
 
 	// Push the image to the registry
-	resp, err := dockerClient.ImagePush(context.Background(), imageTag, image.PushOptions{
-		RegistryAuth: getAuth(),
+	resp, err := state.DockerClient.ImagePush(context.Background(), imageTag, image.PushOptions{
+		RegistryAuth: getAuth(state.Config),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to push image - %w", err)

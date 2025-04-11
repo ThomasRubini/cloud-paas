@@ -3,6 +3,7 @@ package utils
 import (
 	"reflect"
 
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/docker/docker/client"
 	"gorm.io/gorm"
@@ -10,6 +11,7 @@ import (
 )
 
 type State struct {
+	Config          *config.Config
 	Db              *gorm.DB
 	SecretsProvider secretsprovider.Helper
 	DockerClient    *client.Client

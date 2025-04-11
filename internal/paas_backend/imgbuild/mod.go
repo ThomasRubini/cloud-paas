@@ -9,6 +9,7 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
@@ -108,8 +109,8 @@ func writeTarFromCommit(repo *git.Repository, w io.Writer, hash *plumbing.Hash) 
 // Builds an image from the last commit of a given branch, and assigns it the given tags
 // On error, returns logs from the build process
 // The branch worktree must contain a Dockerfile
-func BuildGitBranch(dockerClient *client.Client, app models.DBApplication, env models.DBEnvironment) (string, error) {
-	repoPath := app.GetPath()
+func BuildGitBranch(state utils.State, app models.DBApplication, env models.DBEnvironment) (string, error) {
+	repoPath := app.GetPath(state.Config)
 	logrus.Debugf("Building image at %s", repoPath)
 
 	buildCtx := bytes.Buffer{}
@@ -139,7 +140,7 @@ func BuildGitBranch(dockerClient *client.Client, app models.DBApplication, env m
 	buildOpts := types.ImageBuildOptions{
 		Tags: []string{imageTag},
 	}
-	resp, err := dockerClient.ImageBuild(context.Background(), &buildCtx, buildOpts)
+	resp, err := state.DockerClient.ImageBuild(context.Background(), &buildCtx, buildOpts)
 	if err != nil {
 		return "", fmt.Errorf("failed to build image: %w", err)
 	}

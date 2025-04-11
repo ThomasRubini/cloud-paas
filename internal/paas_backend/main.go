@@ -118,7 +118,7 @@ func getSecretsProvider() secretsprovider.Helper {
 	}
 }
 
-func constructState(conf config.Config) (*utils.State, error) {
+func constructState(conf *config.Config) (*utils.State, error) {
 	// Connect to DB
 	db, err := connectToDB()
 	if err != nil {
@@ -157,6 +157,7 @@ func constructState(conf config.Config) (*utils.State, error) {
 
 	// Construct state
 	return &utils.State{
+		Config:          conf,
 		Db:              db,
 		DockerClient:    dockerClient,
 		HelmConfig:      actionConfig,
@@ -168,7 +169,7 @@ func Entrypoint() {
 	printBuildInfo()
 	config.Init()
 	conf := config.Get()
-	setupLogging(&conf)
+	setupLogging(conf)
 
 	// Setup state (note: we assign to the global variable here)
 	state, err := constructState(config.Get())

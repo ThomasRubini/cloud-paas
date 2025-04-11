@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/secretsprovider"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,7 @@ func fakeState(t *testing.T) utils.State {
 	})
 
 	return utils.State{
+		Config:          &config.Config{},
 		Db:              gorm_db,
 		SecretsProvider: secretsprovider.Helper{Core: secretsprovider.FromFile(filepath.Join(tmpDir, "/secrets.json"))},
 	}

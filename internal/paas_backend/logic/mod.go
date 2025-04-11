@@ -14,13 +14,13 @@ func HandleEnvironmentUpdate(state utils.State, app models.DBApplication, env mo
 	// At this point the repository as already been updated
 
 	// Rebuild the image using the updated repository
-	imageTag, err := imgbuild.BuildGitBranch(state.DockerClient, app, env)
+	imageTag, err := imgbuild.BuildGitBranch(state, app, env)
 	if err != nil {
 		return fmt.Errorf("error building image: %w", err)
 	}
 
 	// Upload it to the registry
-	err = UploadToRegistry(state.DockerClient, imageTag)
+	err = UploadToRegistry(state, imageTag)
 	if err != nil {
 		return fmt.Errorf("error uploading image to registry: %w", err)
 	}

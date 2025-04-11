@@ -221,7 +221,7 @@ func redeployApp(c *gin.Context) {
 	}
 	appConstraints := constructAppFromId(appId)
 
-	var app models.DBApplication
+	var app models.AppWithEnvs
 	if err := state.Db.Preload("Envs").First(&app, appConstraints).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(404, gin.H{"error": "application not found"})

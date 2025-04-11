@@ -24,47 +24,47 @@ func isDir(path string) bool {
 }
 
 // called on every repository on a schedule to fetch them, and deploy any needed environments
-func FetchAndDeployRepository(state utils.State, project models.DBApplication) error {
-	if project.SourceURL == "" {
-		logrus.Infof("Skipping %s (empty source URL)", project.Name)
+func FetchAndDeployRepository(state utils.State, app models.AppWithEnvs) error {
+	if app.SourceURL == "" {
+		logrus.Infof("Skipping %s (empty source URL)", app.Name)
 		return nil
 	}
 
 	// Init repo if it doesn't exist
-	repoPath := project.GetPath(state.Config)
+	repoPath := app.GetPath(state.Config)
 	if !isDir(repoPath) {
-		err := setupRepo(project, repoPath)
+		err := setupRepo(app.DBApplication, repoPath)
 		if err != nil {
 			return fmt.Errorf("error doing a repository setup : %w", err)
 		}
 	}
 
 	// Collect branches data before fetching
-	oldBranches, err := getAllEnvBranchesLastCommit(state, project)
+	oldBranches, err := getAllEnvBranchesLastCommit(state, app)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
-	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), project.Name)
+	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), app.Name)
 
 	// Fetch data from remote
-	err = fetchRepoChanges(state, project)
+	err = fetchRepoChanges(state, app.DBApplication)
 	if err != nil {
 		return fmt.Errorf("error fetching repository: %w", err)
 	}
 
 	// Collect branches data after fetching
-	newBranches, err := getAllEnvBranchesLastCommit(state, project)
+	newBranches, err := getAllEnvBranchesLastCommit(state, app)
 	if err != nil {
 		return fmt.Errorf("error getting all env branches last commit: %w", err)
 	}
-	logrus.Debugf("Collected %v branches for project %s after fetching", len(newBranches), project.Name)
+	logrus.Debugf("Collected %v branches for project %s after fetching", len(newBranches), app.Name)
 
 	// Check if the commits have changed by comparing branches data of before & after fetching
-	for _, env := range project.Envs {
+	for _, env := range app.Envs {
 		logrus.Debugf("Comparing env %s: %s -> %s", env.Name, oldBranches[env.Name], newBranches[env.Name])
 		if oldBranches[env.Name] != newBranches[env.Name] {
 			logrus.Debugf("New commit for env %v on branch %v", env.Name, env.Branch)
-			err := state.LogicModule.HandleEnvironmentUpdate(project, env)
+			err := state.LogicModule.HandleEnvironmentUpdate(app.DBApplication, env)
 			if err != nil {
 				return fmt.Errorf("error handling repository update: %w", err)
 			}
@@ -81,18 +81,18 @@ func handleRepositories() error {
 	// Get state
 	state := utils.GetState()
 
-	var projects []models.DBApplication
-	res := state.Db.Model(&models.DBApplication{}).Preload("Envs").Find(&projects)
+	var apps []models.AppWithEnvs
+	res := state.Db.Model(&models.AppWithEnvs{}).Preload("Envs").Find(&apps)
 	if res.Error != nil {
 		return fmt.Errorf("error fetching project names: %w", res.Error)
 	}
-	logrus.Infof("Found %d projects to fetch", len(projects))
+	logrus.Infof("Found %d projects to fetch", len(apps))
 
-	for _, project := range projects {
-		logrus.Debugf("Handling fetching project %v", project.Name)
-		err := FetchAndDeployRepository(state, project)
+	for _, app := range apps {
+		logrus.Debugf("Handling fetching project %v", app.Name)
+		err := FetchAndDeployRepository(state, app)
 		if err != nil {
-			logrus.Errorf("error handling cron update for project %s: %v", project.Name, err)
+			logrus.Errorf("error handling cron update for project %s: %v", app.Name, err)
 		}
 	}
 
@@ -101,11 +101,11 @@ func handleRepositories() error {
 
 // Get the last commit of all branches matching an environment for a given project
 // Returns a map of environment name -> last correspondig branch commit hash
-func getAllEnvBranchesLastCommit(state utils.State, project models.DBApplication) (map[string]string, error) {
-	dir := project.GetPath(state.Config)
+func getAllEnvBranchesLastCommit(state utils.State, app models.AppWithEnvs) (map[string]string, error) {
+	dir := app.GetPath(state.Config)
 	repo, err := git.PlainOpen(dir)
 	if err != nil {
-		return nil, fmt.Errorf("error opening repository for project %v : %w", project, err)
+		return nil, fmt.Errorf("error opening repository for project %v : %w", app.Name, err)
 	}
 	// Get the remote branches
 	refIter, err := repo.Storer.IterReferences()
@@ -119,7 +119,7 @@ func getAllEnvBranchesLastCommit(state utils.State, project models.DBApplication
 
 	branchesLastCommit := make(map[string]string)
 	//TODO : Optimize this shit
-	for _, env := range project.Envs {
+	for _, env := range app.Envs {
 		err = branches.ForEach(func(branch *plumbing.Reference) error {
 			if strings.TrimPrefix(branch.Name().String(), "refs/remotes/origin/") == env.Branch {
 				branchesLastCommit[env.Name] = branch.Hash().String()
@@ -127,7 +127,7 @@ func getAllEnvBranchesLastCommit(state utils.State, project models.DBApplication
 			return nil
 		})
 		if err != nil {
-			return nil, fmt.Errorf("error iterating branches for project %v: %w", project, err)
+			return nil, fmt.Errorf("error iterating branches for project %v: %w", app.Name, err)
 		}
 	}
 	return branchesLastCommit, nil

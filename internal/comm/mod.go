@@ -27,11 +27,13 @@ type EnvView struct {
 	Domain  string
 	Name    string
 	Branch  string
+	EnvVars string
 	Running bool
 }
 
 type CreateEnvRequest struct {
-	Domain string
-	Name   string
-	Branch string
+	Domain  string
+	Name    string
+	Branch  string
+	EnvVars string
 }

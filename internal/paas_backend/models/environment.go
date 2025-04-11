@@ -6,5 +6,6 @@ type DBEnvironment struct {
 	Domain        string
 	Name          string `gorm:"uniqueIndex:idx_env_name;not null;default:null"`
 	Branch        string
+	EnvVars       string
 	Running       bool
 }

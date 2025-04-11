@@ -15,9 +15,21 @@ import (
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
-func generateChart(options Options) (*chart.Chart, error) {
-	deploymentPath := filepath.Join("assets", "app_deployments", "deployment.yaml")
+func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, error) {
+	deploymentPath := filepath.Join("assets", "helm_templates", "deployment.yaml")
 	deploymentData, err := os.ReadFile(deploymentPath)
+	if err != nil {
+		return nil, err
+	}
+
+	ingressPath := filepath.Join("assets", "helm_templates", "ingress.yaml")
+	ingressData, err := os.ReadFile(ingressPath)
+	if err != nil {
+		return nil, err
+	}
+
+	servicePath := filepath.Join("assets", "helm_templates", "service.yaml")
+	serviceData, err := os.ReadFile(servicePath)
 	if err != nil {
 		return nil, err
 	}
@@ -33,13 +45,22 @@ func generateChart(options Options) (*chart.Chart, error) {
 				Name: "templates/deployment.yaml",
 				Data: deploymentData,
 			},
+			{
+				Name: "templates/service.yaml",
+				Data: serviceData,
+			},
+			{
+				Name: "templates/ingress.yaml",
+				Data: ingressData,
+			},
 		},
 		Values: map[string]interface{}{
 			"deploymentName": options.ReleaseName,
 			"namespace":      options.Namespace,
-			"replicaCount":   1,
+			"replicaCount":   1, // TODO: Add autoscaling later
 			"image":          options.ImageTag,
 			"containerPort":  options.ExposedPort,
+			"domain":         env.Domain,
 		},
 	}
 
@@ -110,7 +131,7 @@ type Options struct {
 func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Deploying release %v", options.ReleaseName)
 
-	myChart, err := generateChart(options)
+	myChart, err := generateChart(options, env)
 	if err != nil {
 		return fmt.Errorf("error generating chart: %w", err)
 	}

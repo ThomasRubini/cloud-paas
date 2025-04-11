@@ -28,6 +28,9 @@ type Config struct {
 
 	SECRETS_IMPL      string `env:"SECRETS_IMPL"`
 	SECRETS_IMPL_FILE string `env:"SECRETS_IMPL_FILE" envDefault:""`
+
+	KUBE_DEPLOYMENT_PREFIX string `env:"KUBE_DEPLOYMENT_PREFIX"`
+	REGISTRY_TAG_PREFIX    string `env:"REGISTRY_TAG_PREFIX"`
 }
 
 var configInst *Config

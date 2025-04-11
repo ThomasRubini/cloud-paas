@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/config"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/docker/docker/api/types"
@@ -127,7 +126,7 @@ func BuildGitBranch(state utils.State, app models.DBApplication, env models.DBEn
 	}
 
 	// Generate image tag
-	imageTag := fmt.Sprintf("%s/%s/%s:%s", config.Get().REGISTRY_REPO_URI, app.Name, env.Name, hash.String())
+	imageTag := fmt.Sprintf("%s/%s/%s/%s:%s", state.Config.REGISTRY_REPO_URI, state.Config.REGISTRY_TAG_PREFIX, app.Name, env.Name, hash.String())
 
 	// Generate tarball from the branch
 	err = writeTarFromCommit(repo, &buildCtx, hash)

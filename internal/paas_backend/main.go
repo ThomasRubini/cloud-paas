@@ -148,7 +148,7 @@ func constructState(conf *config.Config) (utils.State, error) {
 	// Get helm client
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), "default", "memory", log.Printf); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), "default", "secret", log.Printf); err != nil {
 		return nil, fmt.Errorf("error initializing config: %w", err)
 	}
 	// Test it

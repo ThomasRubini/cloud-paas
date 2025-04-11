@@ -123,7 +123,7 @@ type Options struct {
 	ReleaseName string
 }
 
-func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+func DeployEnv(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
 	logrus.Debugf("Deploying release %v", options.ReleaseName)
 
 	myChart, err := generateChart(options, env)
@@ -136,6 +136,22 @@ func DeployApp(helmConfig *action.Configuration, env models.DBEnvironment, optio
 		return fmt.Errorf("error installing chart: %w", err)
 	}
 
-	logrus.Debugf("Deployed app %v successfully", options.ReleaseName)
+	logrus.Debugf("Deployed env %v successfully", options.ReleaseName)
+	return nil
+}
+
+func UninstallEnv(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+	logrus.Debugf("Uninstalling release %v", options.ReleaseName)
+
+	uninstall := action.NewUninstall(helmConfig)
+	uninstall.Timeout = 30 * time.Second
+	uninstall.Wait = true
+
+	_, err := uninstall.Run(options.ReleaseName)
+	if err != nil {
+		return fmt.Errorf("error uninstalling chart: %w", err)
+	}
+
+	logrus.Debugf("Uninstalled env %v successfully", options.ReleaseName)
 	return nil
 }

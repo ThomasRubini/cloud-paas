@@ -28,6 +28,10 @@ func (FakeLogic) HandleEnvironmentUpdate(app models.DBApplication, env models.DB
 	return nil
 }
 
+func (FakeLogic) HandleEnvironmentDeletion(app models.DBApplication, env models.DBEnvironment) error {
+	return nil
+}
+
 func fakeState(t *testing.T) utils.State {
 	gorm_db, err := gorm.Open(sqlite.Open(":memory:"))
 	if err != nil {

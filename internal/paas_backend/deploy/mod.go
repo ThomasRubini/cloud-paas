@@ -70,7 +70,7 @@ func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, err
 			"image":          options.ImageTag,
 			"containerPort":  options.ExposedPort,
 			"domain":         env.Domain,
-			// "envVariables":   options.EnvVars,
+			"envVariables":   options.EnvVars,
 		},
 	}
 

@@ -3,6 +3,7 @@ package clicmds
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_cli/utils"
@@ -26,6 +27,7 @@ var subEnvCmd = &cli.Command{
 		envInfoCmd,
 		envEditCmd,
 		envDeleteCmd,
+		envVarsCmd,
 	},
 }
 
@@ -63,8 +65,14 @@ var envInfoCmd = &cli.Command{
 
 var envEditCmd = &cli.Command{
 	Name:   "edit",
-	Usage:  "Edit a given environment from a given application",
+	Usage:  "Edit environment variable from a given environment of a given application",
 	Action: editEnvAction,
+}
+
+var envVarsCmd = &cli.Command{
+	Name:   "vars",
+	Usage:  "Edit environment variables of a given environment of a given application",
+	Action: editEnvVarsAction,
 }
 
 var envDeleteCmd = &cli.Command{
@@ -137,6 +145,75 @@ func GetEnvInfoAction(ctx context.Context, cmd *cli.Command) error {
 
 func editEnvAction(ctx context.Context, cmd *cli.Command) error {
 	fmt.Printf("Editing env %s for application %s...\n", cmd.Args().First(), appName)
+	return nil
+}
+
+// Action for the "cli env <app_name> edit <env_name>" command
+// this shit is so full omg how do I refactor this
+func editEnvVarsAction(ctx context.Context, cmd *cli.Command) error {
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+
+	tempFile, err := os.CreateTemp("", fmt.Sprintf("ENV_VARS_%s_*.yaml", envName))
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer os.Remove(tempFile.Name())
+
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+		"env_id": envName,
+	}).SetResult(&comm.EnvView{}).Get("/api/v1/applications/{app_id}/environments/{env_id}")
+
+	if err != nil {
+		return fmt.Errorf("failed to get env: %w", err)
+	}
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to get env: %s", resp.String())
+	}
+	yamlBytes, err := utils.JSONtoYAML([]byte(resp.Result().(*comm.EnvView).EnvVars))
+	if err != nil {
+		return fmt.Errorf("failed to convert JSON to YAML: %w", err)
+	}
+	envVars := string(yamlBytes)
+	envVars = fmt.Sprintf("# Add environment variables for your environment %s here in YAML format\n%s", envName, envVars)
+
+	// Write the environment variables to the temp file
+	if _, err := tempFile.WriteString(envVars); err != nil {
+		return fmt.Errorf("failed to write to temp file: %w", err)
+	}
+	tempFile.Close()
+
+	// Open the temp file in the default editor
+	updatedEnvVars, err := utils.OpenInEditor(tempFile.Name())
+	if err != nil {
+		return fmt.Errorf("failed to open editor: %w", err)
+	}
+
+	updatedJson, err := utils.YAMLtoJSON(updatedEnvVars)
+	if err != nil {
+		return fmt.Errorf("failed to parse user input: %w", err)
+	}
+	if string(updatedJson) == resp.Result().(*comm.EnvView).EnvVars {
+		fmt.Print("No changes made to environment variables.")
+	} else {
+		// API Call to update the environment variables
+		resp, err = utils.GetAPIClient().R().SetPathParams(map[string]string{
+			"app_id": appName,
+			"env_id": envName,
+		}).SetBody(&comm.EnvView{
+			EnvVars: string(updatedJson),
+		}).Patch("/api/v1/applications/{app_id}/environments/{env_id}")
+		if err != nil {
+			return fmt.Errorf("failed to update env: %w", err)
+		}
+		if resp.StatusCode() != 200 {
+			return fmt.Errorf("failed to update env: %s", resp.String())
+		}
+		fmt.Printf("Environment %s updated successfully\n", envName)
+	}
 	return nil
 }
 

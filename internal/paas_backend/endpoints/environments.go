@@ -51,6 +51,7 @@ func initEnvironments(g *gin.RouterGroup) {
 	appRouter.GET("/:env_name", getEnv)
 	appRouter.DELETE("/:env_name", deleteEnv)
 	appRouter.PATCH("/:env_name", updateEnv)
+	appRouter.POST("/:env_name/redeploy", redeployEnv)
 }
 
 // GetEnvironments godoc
@@ -251,6 +252,35 @@ func updateEnv(c *gin.Context) {
 	}
 
 	// Update deployment
+	err = state.LogicModule.HandleEnvironmentUpdate(app, *env)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})
+		return
+	}
+
+	c.Status(200)
+}
+
+// RedeployEnvironment godoc
+// @Summary      Redeploy an existing environment
+// @Tags         environments
+// @Param		 app_id path string true "Application ID"
+// @Param        env_name path string true "Environment name"
+// @Success      200
+// @Router       /api/v1/applications/{app_id}/environments/{env_name}/redeploy [post]
+func redeployEnv(c *gin.Context) {
+	state := c.MustGet("state").(utils.State)
+	app := c.MustGet("app").(models.DBApplication)
+
+	env, err := getDBEnv(c)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	} else if env == nil {
+		c.JSON(404, gin.H{"error": "environment not found"})
+		return
+	}
+
 	err = state.LogicModule.HandleEnvironmentUpdate(app, *env)
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})

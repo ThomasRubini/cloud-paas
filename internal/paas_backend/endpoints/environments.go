@@ -2,9 +2,11 @@ package endpoints
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/logic"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -120,6 +122,13 @@ func createEnv(c *gin.Context) {
 		return
 	}
 
+	// Create deployment
+	err := logic.HandleEnvironmentUpdate(state, app, newEnv)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})
+		return
+	}
+
 	logrus.Debugf("Created new environment with ID %d", newEnv.ID)
 	c.JSON(200, comm.IdResponse{ID: newEnv.ID})
 }
@@ -186,6 +195,7 @@ func deleteEnv(c *gin.Context) {
 // @Router       /api/v1/applications/{app_id}/environments/{env_name} [patch]
 func updateEnv(c *gin.Context) {
 	state := c.MustGet("state").(utils.State)
+	app := c.MustGet("app").(models.DBApplication)
 	env, err := getDBEnv(c)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -206,6 +216,13 @@ func updateEnv(c *gin.Context) {
 	// Update db
 	if err := state.Db.Model(&env).Updates(&request).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update deployment
+	err = logic.HandleEnvironmentUpdate(state, app, *env)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})
 		return
 	}
 

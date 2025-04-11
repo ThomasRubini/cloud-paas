@@ -45,3 +45,16 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 
 	return nil
 }
+
+func (l LogicImpl) HandleEnvironmentDeletion(app models.DBApplication, env models.DBEnvironment) error {
+	// Delete the environment from kubernetes
+	err := deploy.UninstallEnv(l.State.HelmConfig, env, deploy.Options{
+		Namespace:   app.Name,
+		ReleaseName: fmt.Sprintf("paas-%s-%s", app.Name, env.Name),
+	})
+	if err != nil {
+		return fmt.Errorf("error deleting environment: %w", err)
+	}
+
+	return nil
+}

@@ -161,6 +161,8 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 // @Router       /api/v1/applications/{app_id}/environments/{env_name} [delete]
 func deleteEnv(c *gin.Context) {
 	state := c.MustGet("state").(utils.State)
+	app := c.MustGet("app").(models.DBApplication)
+
 	env, err := getDBEnv(c)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -177,6 +179,13 @@ func deleteEnv(c *gin.Context) {
 
 	if err := state.Db.Delete(&models.DBEnvironment{}, &envToDelete).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Delete deployment
+	err = state.LogicModule.HandleEnvironmentDeletion(app, envToDelete)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Errorf("failed to delete environment: %w", err).Error()})
 		return
 	}
 

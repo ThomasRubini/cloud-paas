@@ -6,4 +6,5 @@ import (
 
 type Logic interface {
 	HandleEnvironmentUpdate(app models.DBApplication, env models.DBEnvironment) error
+	HandleEnvironmentDeletion(app models.DBApplication, env models.DBEnvironment) error
 }

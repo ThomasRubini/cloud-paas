@@ -139,3 +139,19 @@ func DeployEnv(helmConfig *action.Configuration, env models.DBEnvironment, optio
 	logrus.Debugf("Deployed env %v successfully", options.ReleaseName)
 	return nil
 }
+
+func UninstallEnv(helmConfig *action.Configuration, env models.DBEnvironment, options Options) error {
+	logrus.Debugf("Uninstalling release %v", options.ReleaseName)
+
+	uninstall := action.NewUninstall(helmConfig)
+	uninstall.Timeout = 30 * time.Second
+	uninstall.Wait = true
+
+	_, err := uninstall.Run(options.ReleaseName)
+	if err != nil {
+		return fmt.Errorf("error uninstalling chart: %w", err)
+	}
+
+	logrus.Debugf("Uninstalled env %v successfully", options.ReleaseName)
+	return nil
+}

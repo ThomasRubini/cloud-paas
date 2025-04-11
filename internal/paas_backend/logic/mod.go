@@ -33,7 +33,7 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	port := imgbuild.GetExposedPort(l.State.DockerClient, imageTag)
 
 	// Redeploy to kubernetes using the new image
-	err = deploy.DeployApp(l.State.HelmConfig, env, deploy.Options{
+	err = deploy.DeployEnv(l.State.HelmConfig, env, deploy.Options{
 		ImageTag:    imageTag,
 		ExposedPort: *port,
 		Namespace:   app.Name,

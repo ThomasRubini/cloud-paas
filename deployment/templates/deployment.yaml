@@ -103,7 +103,7 @@ spec:
             
             - name: DOCKER_HOST
               value: "tcp://docker-daemon:2375"
-            - name: KUBE_DEPLOYMENT_PREFIX
+            - name: KUBE_NAMESPACE_PREFIX
               value: {{ .Values.app.kube.deployment_prefix | quote }}
 
           livenessProbe:

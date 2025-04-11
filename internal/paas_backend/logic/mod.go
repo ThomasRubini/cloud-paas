@@ -37,8 +37,8 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	err = deploy.DeployEnv(l.State.HelmConfig, env, deploy.Options{
 		ImageTag:    imageTag,
 		ExposedPort: *port,
-		Namespace:   fmt.Sprintf("%s-%s", config.Get().KUBE_DEPLOYMENT_PREFIX, app.Name),
-		ReleaseName: fmt.Sprintf("%s-%s-%s", config.Get().KUBE_DEPLOYMENT_PREFIX, app.Name, env.Name),
+		Namespace:   fmt.Sprintf("%s-%s", config.Get().KUBE_NAMESPACE_PREFIX, app.Name),
+		ReleaseName: fmt.Sprintf("%s-%s", app.Name, env.Name),
 	})
 	if err != nil {
 		return fmt.Errorf("error deploying app: %w", err)

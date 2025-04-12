@@ -88,19 +88,6 @@ spec:
             - name: REGISTRY_TAG_PREFIX
               value: {{ .Values.app.registry.tag_prefix | quote }}
 
-            - name: OIDC_BASE_URL
-              value: "http://localhost:7079"
-            - name: OIDC_USER_ID
-              value: "paas-backend"
-            - name: OIDC_USER_PASSWORD
-              value: "paas-backend"
-            - name: OIDC_REALM
-              value: "master"
-            - name: OIDC_CLIENT_ID
-              value: "paas-backend"
-            - name: OIDC_CLIENT_SECRET
-              value: "paas-backend"
-            
             - name: DOCKER_HOST
               value: "tcp://docker-daemon:2375"
             - name: KUBE_NAMESPACE_PREFIX

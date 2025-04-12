@@ -8,5 +8,4 @@ import (
 func Init(g *gin.RouterGroup) {
 	initApplications(g)
 	initEnvironments(g)
-	initRegister(g)
 }

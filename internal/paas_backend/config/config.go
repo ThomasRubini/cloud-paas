@@ -15,12 +15,6 @@ type Config struct {
 	REPO_DIR               string `env:"REPO_DIR"`
 	DB_URL                 string `env:"DB_URL"`
 	DB_PASSWORD            string `env:"DB_PASSWORD"`
-	OIDC_BASE_URL          string `env:"OIDC_BASE_URL"`
-	OIDC_CLIENT_ID         string `env:"OIDC_CLIENT_ID"`
-	OIDC_CLIENT_SECRET     string `env:"OIDC_CLIENT_SECRET"`
-	OIDC_USER_ID           string `env:"OIDC_USER_ID"`
-	OIDC_USER_PASSWORD     string `env:"OIDC_USER_PASSWORD"`
-	OIDC_REALM             string `env:"OIDC_REALM"`
 
 	REGISTRY_REPO_URI string `env:"REGISTRY_REPO_URI"`
 	REGISTRY_USER     string `env:"REGISTRY_USER" envDefault:""`

@@ -13,9 +13,7 @@ var RootCmd = &cli.Command{
 		},
 	},
 	Commands: []*cli.Command{
-		AccountCmd,
 		AppCmd,
 		EnvCmd,
-		TokenCmd,
 	},
 }

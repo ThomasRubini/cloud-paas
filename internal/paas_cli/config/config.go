@@ -30,9 +30,7 @@ func findConfigFile() *string {
 }
 
 type Config struct {
-	BACKEND_URL    string `yaml:"backend_url"`
-	OIDC_REALM_URL string `yaml:"oidc_realm_url"`
-	REFRESH_TOKEN  string `yaml:"refresh_token"`
+	BACKEND_URL string `yaml:"backend_url"`
 }
 
 var configInst *Config

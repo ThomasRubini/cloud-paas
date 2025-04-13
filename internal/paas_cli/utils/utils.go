@@ -8,10 +8,5 @@ import (
 func GetAPIClient() *resty.Client {
 	r := resty.New()
 	r.SetBaseURL(config.Get().BACKEND_URL)
-	c := config.Get()
-	if c.REFRESH_TOKEN != "" {
-		r.SetHeader("Authorization", "Bearer "+c.REFRESH_TOKEN)
-	}
-
 	return r
 }

@@ -17,10 +17,3 @@ image:
 
 app:
   verbose: "0"
-  oidc:
-    base_url: "http://localhost:7079"
-    user_id: "paas-backend"
-    user_password: "paas-backend"
-    realm: "master"
-    client_id: "paas-backend"
-    client_secret: "paas-backend"

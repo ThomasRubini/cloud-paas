@@ -149,7 +149,6 @@ func editEnvAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 // Action for the "cli env <app_name> edit <env_name>" command
-// this shit is so full omg how do I refactor this
 func editEnvVarsAction(ctx context.Context, cmd *cli.Command) error {
 	envName := cmd.Args().First()
 	if envName == "" {

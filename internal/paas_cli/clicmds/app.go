@@ -118,6 +118,10 @@ func GetAppListAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func GetAppInfoAction(ctx context.Context, cmd *cli.Command) error {
+	appName := cmd.Args().First()
+	if appName == "" {
+		return fmt.Errorf("app name is required")
+	}
 	var app comm.AppView
 	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
 		"app_id": cmd.Args().First(),

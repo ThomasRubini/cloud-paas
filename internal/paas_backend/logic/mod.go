@@ -35,16 +35,18 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	port := imgbuild.GetExposedPort(l.State.DockerClient, imageTag)
 
 	parsedEnv := make(map[string]any)
-	err = json.Unmarshal([]byte(env.EnvVars), &parsedEnv)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling environment variables: %w", err)
-	}
 	parsedEnvStr := make(map[string]string)
-	//avoid type misparsing from Kubernetes
-	for k, v := range parsedEnv {
-		parsedEnvStr[k] = fmt.Sprintf("%v", v)
+	if env.EnvVars != "" {
+		err = json.Unmarshal([]byte(env.EnvVars), &parsedEnv)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling environment variables: %w", err)
+		}
+		parsedEnvStr := make(map[string]string)
+		//avoid type misparsing from Kubernetes
+		for k, v := range parsedEnv {
+			parsedEnvStr[k] = fmt.Sprintf("%v", v)
+		}
 	}
-
 	// Redeploy to kubernetes using the new image
 	err = deploy.DeployEnv(env, deploy.Options{
 		ImageTag:    imageTag,

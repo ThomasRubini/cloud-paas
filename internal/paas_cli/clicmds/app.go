@@ -21,9 +21,10 @@ var AppCmd = &cli.Command{
 }
 
 var appCreateCmd = &cli.Command{
-	Name:   "create",
-	Usage:  "Create an application",
-	Action: createAppAction,
+	Name:      "create",
+	Usage:     "Create an application",
+	Action:    createAppAction,
+	UsageText: "cli app create <app_name> --source-url <url> --source-username <username> --source-password <password>",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "desc",
@@ -46,21 +47,24 @@ var appCreateCmd = &cli.Command{
 }
 
 var appListCmd = &cli.Command{
-	Name:   "list",
-	Usage:  "List all applications of your account",
-	Action: GetAppListAction,
+	Name:      "list",
+	Usage:     "List all applications of your account",
+	Action:    GetAppListAction,
+	UsageText: "cli app list",
 }
 
 var appInfoCmd = &cli.Command{
-	Name:   "info",
-	Usage:  "Get information about a specific application",
-	Action: GetAppInfoAction,
+	Name:      "info",
+	Usage:     "Get information about a specific application",
+	Action:    GetAppInfoAction,
+	UsageText: "cli app info <app_name>",
 }
 
 var appDeleteCmd = &cli.Command{
-	Name:   "delete",
-	Usage:  "Remove an application from your applications",
-	Action: deleteAppAction,
+	Name:      "delete",
+	Usage:     "Remove an application from your applications",
+	Action:    deleteAppAction,
+	UsageText: "cli app delete <app_name>",
 }
 
 func createAppAction(ctx context.Context, cmd *cli.Command) error {

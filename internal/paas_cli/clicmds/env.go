@@ -28,6 +28,7 @@ var subEnvCmd = &cli.Command{
 		envEditCmd,
 		envDeleteCmd,
 		envVarsCmd,
+		envRedeployCmd,
 	},
 }
 
@@ -79,6 +80,12 @@ var envDeleteCmd = &cli.Command{
 	Name:   "delete",
 	Usage:  "Remove a given environment from a given application",
 	Action: deleteEnvAction,
+}
+
+var envRedeployCmd = &cli.Command{
+	Name:   "redeploy",
+	Usage:  "Redeploy a given environment from a given application",
+	Action: redeployEnvAction,
 }
 
 func EnvCmdAction(ctx context.Context, cmd *cli.Command) error {
@@ -235,5 +242,25 @@ func deleteEnvAction(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	fmt.Println("Environment deleted successfully")
+	return nil
+}
+
+func redeployEnvAction(ctx context.Context, cmd *cli.Command) error {
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+	fmt.Printf("Redeploying env %s for application %s...\n", envName, appName)
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+		"env_id": envName,
+	}).Post("/api/v1/applications/{app_id}/environments/{env_id}/redeploy")
+	if err != nil {
+		return fmt.Errorf("failed to redeploy env: %w", err)
+	}
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to redeploy env: %s", resp.String())
+	}
+	fmt.Printf("Environment %s redeployed successfully\n", envName)
 	return nil
 }

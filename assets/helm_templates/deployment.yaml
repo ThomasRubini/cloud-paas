@@ -17,4 +17,8 @@ spec:
         - name: '{{ .Values.deploymentName }}'
           image: '{{ .Values.image }}'
           ports:
-            - containerPort: {{ .Values.containerPort }}
+          - containerPort: {{ .Values.containerPort }}
+          envFrom:
+          - secretRef:
+              name: '{{ .Values.deploymentName }}-secret'
+              optional: false

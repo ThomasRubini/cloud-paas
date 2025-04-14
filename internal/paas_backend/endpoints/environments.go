@@ -48,6 +48,7 @@ func initEnvironments(g *gin.RouterGroup) {
 	appRouter.Use(queryApp)
 	appRouter.GET("", getEnvs)
 	appRouter.POST("", createEnv)
+	appRouter.GET("/:env_name", getEnv)
 	appRouter.DELETE("/:env_name", deleteEnv)
 	appRouter.PATCH("/:env_name", updateEnv)
 }
@@ -152,6 +153,30 @@ func getDBEnv(c *gin.Context) (*models.DBEnvironment, error) {
 	return &env, nil
 }
 
+// GetEnvironment godoc
+// @Summary      Get an environment
+// @Tags         environments
+// @Produce      json
+// @Param		 app_id path string true "Application ID"
+// @Param        env_name path string true "Environment name"
+// @Success      200 {object} comm.EnvView
+// @Router       /api/v1/applications/{app_id}/environments/{env_name} [get]
+func getEnv(c *gin.Context) {
+	env, err := getDBEnv(c)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	} else if env == nil {
+		c.JSON(404, gin.H{"error": "environment not found"})
+		return
+	}
+
+	var envView comm.EnvView
+	utils.CopyFields(env, &envView)
+
+	c.JSON(200, envView)
+}
+
 // DeleteEnvironment godoc
 // @Summary      Delete an environment
 // @Tags         environments
@@ -218,8 +243,6 @@ func updateEnv(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-
-	utils.CopyFields(&request, env)
 
 	// Update db
 	if err := state.Db.Model(&env).Updates(&request).Error; err != nil {

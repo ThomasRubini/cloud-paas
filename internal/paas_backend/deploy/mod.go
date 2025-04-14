@@ -67,6 +67,7 @@ func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, err
 			"image":          options.ImageTag,
 			"containerPort":  options.ExposedPort,
 			"domain":         env.Domain,
+			"envVariables":   options.EnvVars,
 		},
 	}
 
@@ -132,6 +133,7 @@ type Options struct {
 	ImageTag    string
 	ExposedPort int
 	ReleaseName string
+	EnvVars     map[string]string
 }
 
 func DeployEnv(env models.DBEnvironment, options Options) error {

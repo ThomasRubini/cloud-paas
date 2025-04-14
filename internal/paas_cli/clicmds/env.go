@@ -146,7 +146,35 @@ func GetEnvListAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func GetEnvInfoAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Getting env %s informations for application %s...\n", cmd.Args().First(), appName)
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+		"env_id": envName,
+	}).SetResult(&comm.EnvView{}).Get("/api/v1/applications/{app_id}/environments/{env_id}")
+	if err != nil {
+		return fmt.Errorf("failed to get env info: %w", err)
+	}
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to get env info: %s", resp.String())
+	}
+	env := resp.Result().(*comm.EnvView)
+	fmt.Printf("Environment %s:\n", env.Name)
+	fmt.Printf("  Branch: %s\n", env.Branch)
+	fmt.Printf("  Domain: %s\n", env.Domain)
+	fmt.Printf("Environment Variables of %s:\n", env.Name)
+	if env.EnvVars != "" {
+		// Convert JSON to YAML for better readability
+		yamlBytes, err := utils.JSONtoYAML([]byte(env.EnvVars))
+		if err != nil {
+			return fmt.Errorf("failed to convert environment variables to YAML: %w", err)
+		}
+		fmt.Printf("%s\n", string(yamlBytes))
+	} else {
+		fmt.Println("    No environment variables defined")
+	}
 	return nil
 }
 

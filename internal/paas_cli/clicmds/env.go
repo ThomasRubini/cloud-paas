@@ -68,6 +68,20 @@ var envEditCmd = &cli.Command{
 	Name:   "edit",
 	Usage:  "Edit environment variable from a given environment of a given application",
 	Action: editEnvAction,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "branch",
+			Usage:    "Branch to use for the environment",
+			Required: false,
+			Aliases:  []string{"b"},
+		},
+		&cli.StringFlag{
+			Name:     "domain",
+			Usage:    "Domain to use for the environment",
+			Required: false,
+			Aliases:  []string{"d"},
+		},
+	},
 }
 
 var envVarsCmd = &cli.Command{
@@ -179,7 +193,35 @@ func GetEnvInfoAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func editEnvAction(ctx context.Context, cmd *cli.Command) error {
-	fmt.Printf("Editing env %s for application %s...\n", cmd.Args().First(), appName)
+	// check for
+	envName := cmd.Args().First()
+	if envName == "" {
+		return fmt.Errorf("env name is required")
+	}
+	branch := cmd.String("branch")
+	domain := cmd.String("domain")
+	if branch == "" && domain == "" {
+		return fmt.Errorf("at least one of branch or domain is required")
+	}
+	updateRequest := comm.CreateEnvRequest{}
+	if branch != "" {
+		updateRequest.Branch = branch
+	}
+	if domain != "" {
+		updateRequest.Domain = domain
+	}
+
+	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
+		"app_id": appName,
+		"env_id": envName,
+	}).SetBody(&updateRequest).Patch("/api/v1/applications/{app_id}/environments/{env_id}")
+	if err != nil {
+		return fmt.Errorf("failed to update env: %w", err)
+	}
+	if resp.StatusCode() != 200 {
+		return fmt.Errorf("failed to update env: %s", resp.String())
+	}
+	fmt.Printf("Environment %s updated successfully\n", envName)
 	return nil
 }
 

@@ -163,9 +163,9 @@ func editEnvVarsAction(ctx context.Context, cmd *cli.Command) error {
 	defer os.Remove(tempFile.Name())
 
 	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
-		"app_id": appName,
-		"env_id": envName,
-	}).SetResult(&comm.EnvView{}).Get("/api/v1/applications/{app_id}/environments/{env_id}")
+		"app_name": appName,
+		"env_name": envName,
+	}).SetResult(&comm.EnvView{}).Get("/api/v1/applications/{app_name}/environments/{env_name}")
 
 	if err != nil {
 		return fmt.Errorf("failed to get env: %w", err)

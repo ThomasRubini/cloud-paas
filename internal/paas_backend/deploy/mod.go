@@ -53,9 +53,6 @@ func generateChart(options Options, env models.DBEnvironment) (*chart.Chart, err
 		return nil, fmt.Errorf("error reading helm templates: %w", err)
 	}
 
-	fmt.Println("AAAAAAAAAa")
-	fmt.Printf("%v\n", options)
-
 	myChart := &chart.Chart{
 		Metadata: &chart.Metadata{
 			Name:       options.ReleaseName,

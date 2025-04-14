@@ -284,6 +284,7 @@ func editEnvVarsAction(ctx context.Context, cmd *cli.Command) error {
 		fmt.Print("No changes made to environment variables.")
 	} else {
 		// API Call to update the environment variables
+		fmt.Printf("Updating environment %s...\n", envName)
 		resp, err = utils.GetAPIClient().R().SetPathParams(map[string]string{
 			"app_id": appName,
 			"env_id": envName,

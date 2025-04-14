@@ -30,8 +30,9 @@ var appCreateCmd = &cli.Command{
 			Usage: "Description of the application",
 		},
 		&cli.StringFlag{
-			Name:  "source-url",
-			Usage: "Source URL of the application",
+			Name:     "source-url",
+			Usage:    "Source URL of the application",
+			Required: true,
 		},
 		&cli.StringFlag{
 			Name:  "source-username",

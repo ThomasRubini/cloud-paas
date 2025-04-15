@@ -41,7 +41,7 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 		if err != nil {
 			return fmt.Errorf("error unmarshalling environment variables: %w", err)
 		}
-		parsedEnvStr := make(map[string]string)
+		parsedEnvStr = make(map[string]string)
 		//avoid type misparsing from Kubernetes
 		for k, v := range parsedEnv {
 			parsedEnvStr[k] = fmt.Sprintf("%v", v)

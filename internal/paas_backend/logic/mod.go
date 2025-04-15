@@ -34,9 +34,9 @@ func (l LogicImpl) HandleEnvironmentUpdate(app models.DBApplication, env models.
 	// Get the exposed port from the image
 	port := imgbuild.GetExposedPort(l.State.DockerClient, imageTag)
 
-	parsedEnv := make(map[string]any)
 	parsedEnvStr := make(map[string]string)
 	if env.EnvVars != "" {
+		parsedEnv := make(map[string]any)
 		err = json.Unmarshal([]byte(env.EnvVars), &parsedEnv)
 		if err != nil {
 			return fmt.Errorf("error unmarshalling environment variables: %w", err)

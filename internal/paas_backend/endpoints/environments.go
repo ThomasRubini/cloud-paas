@@ -7,6 +7,7 @@ import (
 
 	"github.com/ThomasRubini/cloud-paas/internal/comm"
 	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/models"
+	"github.com/ThomasRubini/cloud-paas/internal/paas_backend/repofetch"
 	"github.com/ThomasRubini/cloud-paas/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -252,6 +253,11 @@ func updateEnv(c *gin.Context) {
 	}
 
 	// Update deployment
+	err = repofetch.FetchRepoChanges(state, app)
+	if err != nil {
+		c.JSON(500, gin.H{"error": fmt.Errorf("failed to fetch repository: %w", err).Error()})
+		return
+	}
 	err = state.LogicModule.HandleEnvironmentUpdate(app, *env)
 	if err != nil {
 		c.JSON(500, gin.H{"error": fmt.Errorf("failed to deploy environment: %w", err).Error()})

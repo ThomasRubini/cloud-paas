@@ -47,7 +47,7 @@ func FetchAndDeployRepository(state utils.State, app models.AppWithEnvs) error {
 	logrus.Debugf("Collected %v branches for project %s before fetching", len(oldBranches), app.Name)
 
 	// Fetch data from remote
-	err = fetchRepoChanges(state, app.DBApplication)
+	err = FetchRepoChanges(state, app.DBApplication)
 	if err != nil {
 		return fmt.Errorf("error fetching repository: %w", err)
 	}

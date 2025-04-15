@@ -21,17 +21,19 @@ var AppCmd = &cli.Command{
 }
 
 var appCreateCmd = &cli.Command{
-	Name:   "create",
-	Usage:  "Create an application",
-	Action: createAppAction,
+	Name:      "create",
+	Usage:     "Create an application",
+	Action:    createAppAction,
+	UsageText: "cli app create <app_name> --source-url <url> --source-username <username> --source-password <password>",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "desc",
 			Usage: "Description of the application",
 		},
 		&cli.StringFlag{
-			Name:  "source-url",
-			Usage: "Source URL of the application",
+			Name:     "source-url",
+			Usage:    "Source URL of the application",
+			Required: true,
 		},
 		&cli.StringFlag{
 			Name:  "source-username",
@@ -45,21 +47,24 @@ var appCreateCmd = &cli.Command{
 }
 
 var appListCmd = &cli.Command{
-	Name:   "list",
-	Usage:  "List all applications of your account",
-	Action: GetAppListAction,
+	Name:      "list",
+	Usage:     "List all applications of your account",
+	Action:    GetAppListAction,
+	UsageText: "cli app list",
 }
 
 var appInfoCmd = &cli.Command{
-	Name:   "info",
-	Usage:  "Get information about a specific application",
-	Action: GetAppInfoAction,
+	Name:      "info",
+	Usage:     "Get information about a specific application",
+	Action:    GetAppInfoAction,
+	UsageText: "cli app info <app_name>",
 }
 
 var appDeleteCmd = &cli.Command{
-	Name:   "delete",
-	Usage:  "Remove an application from your applications",
-	Action: deleteAppAction,
+	Name:      "delete",
+	Usage:     "Remove an application from your applications",
+	Action:    deleteAppAction,
+	UsageText: "cli app delete <app_name>",
 }
 
 func createAppAction(ctx context.Context, cmd *cli.Command) error {
@@ -113,6 +118,10 @@ func GetAppListAction(ctx context.Context, cmd *cli.Command) error {
 }
 
 func GetAppInfoAction(ctx context.Context, cmd *cli.Command) error {
+	appName := cmd.Args().First()
+	if appName == "" {
+		return fmt.Errorf("app name is required")
+	}
 	var app comm.AppView
 	resp, err := utils.GetAPIClient().R().SetPathParams(map[string]string{
 		"app_id": cmd.Args().First(),

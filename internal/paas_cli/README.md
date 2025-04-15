@@ -49,12 +49,7 @@ Retrieves detailed information about a specific application.
 **Arguments:**
 - `<app_name>`: Name of the application to retrieve information about (required)
 
-**Output includes:**
-- Application ID
-- Name
-- Description
-- Source URL
-- Auto Deploy status
+Output includes Application ID, name, description, and repos source URL
 
 #### Delete an application
 ```

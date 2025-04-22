@@ -1,5 +1,9 @@
-.PHONY: backend_docs cli backend
+.PHONY: backend_docs cli backend clean
 swag = go run github.com/swaggo/swag/cmd/swag@v1.16.4
+
+clean:
+	git clean -fdx internal/paas_backend/docs || exit 0
+	rm -rf backend cli
 
 backend_docs:
 	git clean -fdx internal/paas_backend/docs || exit 0
